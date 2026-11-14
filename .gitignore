@@ -1,0 +1,11 @@
+# secrets — never commit keys or certificates
+.env
+secrets/
+*.crt
+*key*.txt
+# python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
