@@ -81,7 +81,21 @@ Curated n = 36 answerable questions; synthetic test n = 45. Confidence intervals
 
 ### 4.2 Answers
 
-<!-- ANSWERS -->
+Curated set, 42 questions (36 answerable, 6 unanswerable), one Qwen3-8B call per question. The final configuration (B3 + prompt `answer-v2`) is compared with the first run (B4 + prompt v1). The prompt was changed using a separate 20-question answer-tuning set (`answer_dev.jsonl`; unanswerable questions declined went from 5/8 to 7/8), not the test set.
+
+| Measure | First run (B4, v1) | **Final (B3, v2)** |
+|---|---|---|
+| Unanswerable questions correctly declined | 2 / 6 | **4 / 6** |
+| Answerable questions answered | 36 / 36 | 36 / 36 |
+| Invalid JSON replies | 0 | 0 |
+| Cited labels that exist in the evidence pack | 100% | 100% |
+| Claims without a valid citation | 0 / 110 | 0 / 164 |
+| Gold papers among cited passages | 0.66 | **0.70** |
+| Automatic judge: supported / partial / not supported | 95.5% / 3.6% / 0.9% | 89.0% / 5.5% / 5.5% |
+| Latency p50 / p95 | 6.4 s / 10.6 s | 7.0 s / 12.2 s |
+| Mean tokens per answer (input + output) | 2,262 | 2,373 |
+
+**Reading it.** The citation audit works: across 274 claims, no citation pointed to a passage the model wasn't given. Prompt v2 doubles correct abstention without losing any answerable question. Its answers are longer (164 vs 110 claims), and the automatic judge flags more of them as not supported (5.5% vs 0.9%). The judge is Qwen3-8B grading its own output, so both rates are likely optimistic. Human labels (§4.3) are the real measure.
 
 ### 4.3 Citation support, human labels **[TEAM]**
 
@@ -89,7 +103,18 @@ Curated n = 36 answerable questions; synthetic test n = 45. Confidence intervals
 
 ## 5. Failure analysis
 
-<!-- FAILURES -->
+Failures from the final run, grouped by cause. Question IDs are in `data/eval/questions_v0.jsonl`; full outputs are in `query_runs`.
+
+| Cause | Examples | What happened | Possible fix |
+|---|---|---|---|
+| **Scope mismatch is not detected** | q15 (medical diagnosis) | A general-domain "best practices" recipe was presented as the answer to a domain-specific question | Add an evidence check for domain and population fit; add "different domain" as a reason to abstain |
+| **Second-hand claims taken from surveys** | q41 (ChatGPT browsing) | A 2025 survey's one-line claim about GPT-4-turbo was stretched into a claim about ChatGPT browsing. **The gold label may also be wrong:** the corpus does contain a second-hand statement, so the team should review this question. | Down-weight or label survey passages ("according to survey X…"); prefer primary sources |
+| **Comparison and lineage questions cite only some of the gold papers** | q08, q10, q27, q30, q32 (gold papers cited: 0–0.33) | The answer is plausible but rests on one side or one paper. q32 cited a different community-based GraphRAG paper than the drafted gold. | Ensure each entity named in the question has evidence (a retrieval sub-query per entity); review gold labels |
+| **Disagreement questions retrieve poorly** | q34–q36 (paper R@10 0.33) | The answers are sensible ("not established; depends on the setting") but cite different papers from the gold | Rewrite or decompose the query; the citation graph didn't help here (§4.1) |
+| **The metadata gold label is too narrow** | q37 | It named a different, valid RAG survey (arXiv 2506.00054) from the drafted gold paper | Gold review: accept any qualifying paper |
+| **Automatic judge disagreements** | q07, q20, q24, q25, q27 (one claim each) | The judge marked a single claim as not supported; these need human checking | The human audit (§4.3) decides |
+
+**What works reliably:** single-paper lookups (14/14 answered, gold paper retrieved for all), metadata lookups, a 100% valid citation audit, and no invalid JSON in any of the 124 evaluated answers (42 + 40 tuning + 42).
 
 ## 6. Limitations
 

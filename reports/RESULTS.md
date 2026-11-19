@@ -66,19 +66,19 @@ Paper Recall@10 by question type:
 | B2 Hybrid | 0.412 | 0.675 | 0.789 | 0.564 | 0.571 |
 | B3 Hybrid+rerank | 0.454 | 0.747 | 0.845 | 0.599 | 0.622 |
 
-## End-to-end answers — curated set, B4 +1-hop graph (n = 42)
+## End-to-end answers — curated set, B3 Hybrid+rerank (n = 42)
 
 | Measure | Value |
 |---|---|
-| Declined unanswerable questions | 2/6 |
+| Declined unanswerable questions | 4/6 |
 | Answered answerable questions | 36/36 |
 | Invalid JSON replies | 0 |
 | Citation IDs that exist in the evidence | 1.0 |
-| Claims without a valid citation | 0/110 |
-| Gold papers among cited passages | 0.655 |
-| Auto-judged: supported / partial / not supported | 0.955 / 0.036 / 0.009 |
-| Latency p50 / p95 (s) | 6.35 / 10.57 |
-| Mean tokens per answer | 2262 |
+| Claims without a valid citation | 0/164 |
+| Gold papers among cited passages | 0.697 |
+| Auto-judged: supported / partial / not supported | 0.89 / 0.055 / 0.055 |
+| Latency p50 / p95 (s) | 7.04 / 12.19 |
+| Mean tokens per answer | 2373 |
 
 *auto_support_* are Qwen3-8B judging its own answers: an estimate. Human labels in reports/citation_audit_sample.csv are the real measure.*
 
@@ -88,7 +88,5 @@ Human citation-support labels: fill in `reports/citation_audit_sample.csv` (colu
 
 | Question | Type | Expected answerable | Model said | Note |
 |---|---|---|---|---|
-| q15 | unanswerable | False | True | The best RAG method for medical diagnosis in hospitals is not explicitly stated in the evidence, but the Best Performanc |
-| q40 | unanswerable | False | True | The evidence does not directly state which RAG method has the lowest carbon footprint per query. However, it mentions th |
-| q41 | unanswerable | False | True | The evidence suggests that OpenAI uses dynamic retrieval calls via system prompts for ChatGPT's browsing feature, as ind |
-| q42 | unanswerable | False | True | The exact recall@10 of RAPTOR on the Natural Questions test set with a 70B reader is not directly provided in the eviden |
+| q15 | unanswerable | False | True | The best RAG method for medical diagnosis in hospitals is the Best Performance Practice, which includes incorporating a  |
+| q41 | unanswerable | False | True | OpenAI uses dynamic retrieval calls via system prompts for ChatGPT's browsing feature, as described in the passage. |
