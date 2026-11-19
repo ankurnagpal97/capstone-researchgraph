@@ -1,0 +1,338 @@
+{
+ "answer-v1": {
+  "declined_unanswerable": "5/8",
+  "answered_answerable": "12/12",
+  "guard_fired": 0,
+  "json_errors": 0,
+  "rows": [
+   {
+    "qid": "ad01",
+    "expected": false,
+    "model": false,
+    "guard": false,
+    "claims": 0,
+    "error": null
+   },
+   {
+    "qid": "ad02",
+    "expected": false,
+    "model": true,
+    "guard": false,
+    "claims": 2,
+    "error": null
+   },
+   {
+    "qid": "ad03",
+    "expected": false,
+    "model": false,
+    "guard": false,
+    "claims": 0,
+    "error": null
+   },
+   {
+    "qid": "ad04",
+    "expected": false,
+    "model": true,
+    "guard": false,
+    "claims": 2,
+    "error": null
+   },
+   {
+    "qid": "ad05",
+    "expected": false,
+    "model": false,
+    "guard": false,
+    "claims": 0,
+    "error": null
+   },
+   {
+    "qid": "ad06",
+    "expected": false,
+    "model": true,
+    "guard": false,
+    "claims": 1,
+    "error": null
+   },
+   {
+    "qid": "ad07",
+    "expected": false,
+    "model": false,
+    "guard": false,
+    "claims": 0,
+    "error": null
+   },
+   {
+    "qid": "ad08",
+    "expected": false,
+    "model": false,
+    "guard": false,
+    "claims": 0,
+    "error": null
+   },
+   {
+    "qid": "ad_s126",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 1,
+    "error": null
+   },
+   {
+    "qid": "ad_s037",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 2,
+    "error": null
+   },
+   {
+    "qid": "ad_s100",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 1,
+    "error": null
+   },
+   {
+    "qid": "ad_s145",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 2,
+    "error": null
+   },
+   {
+    "qid": "ad_s035",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 3,
+    "error": null
+   },
+   {
+    "qid": "ad_s084",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 2,
+    "error": null
+   },
+   {
+    "qid": "ad_s010",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 3,
+    "error": null
+   },
+   {
+    "qid": "ad_s071",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 2,
+    "error": null
+   },
+   {
+    "qid": "ad_s108",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 2,
+    "error": null
+   },
+   {
+    "qid": "ad_s018",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 3,
+    "error": null
+   },
+   {
+    "qid": "ad_s055",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 3,
+    "error": null
+   },
+   {
+    "qid": "ad_s069",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 1,
+    "error": null
+   }
+  ]
+ },
+ "answer-v2": {
+  "declined_unanswerable": "7/8",
+  "answered_answerable": "11/12",
+  "guard_fired": 1,
+  "json_errors": 0,
+  "rows": [
+   {
+    "qid": "ad01",
+    "expected": false,
+    "model": false,
+    "guard": false,
+    "claims": 0,
+    "error": null
+   },
+   {
+    "qid": "ad02",
+    "expected": false,
+    "model": false,
+    "guard": false,
+    "claims": 4,
+    "error": null
+   },
+   {
+    "qid": "ad03",
+    "expected": false,
+    "model": false,
+    "guard": false,
+    "claims": 7,
+    "error": null
+   },
+   {
+    "qid": "ad04",
+    "expected": false,
+    "model": false,
+    "guard": false,
+    "claims": 3,
+    "error": null
+   },
+   {
+    "qid": "ad05",
+    "expected": false,
+    "model": false,
+    "guard": false,
+    "claims": 0,
+    "error": null
+   },
+   {
+    "qid": "ad06",
+    "expected": false,
+    "model": true,
+    "guard": false,
+    "claims": 1,
+    "error": null
+   },
+   {
+    "qid": "ad07",
+    "expected": false,
+    "model": false,
+    "guard": false,
+    "claims": 0,
+    "error": null
+   },
+   {
+    "qid": "ad08",
+    "expected": false,
+    "model": false,
+    "guard": false,
+    "claims": 0,
+    "error": null
+   },
+   {
+    "qid": "ad_s126",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 1,
+    "error": null
+   },
+   {
+    "qid": "ad_s037",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 2,
+    "error": null
+   },
+   {
+    "qid": "ad_s100",
+    "expected": true,
+    "model": false,
+    "guard": true,
+    "claims": 2,
+    "error": null
+   },
+   {
+    "qid": "ad_s145",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 3,
+    "error": null
+   },
+   {
+    "qid": "ad_s035",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 3,
+    "error": null
+   },
+   {
+    "qid": "ad_s084",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 4,
+    "error": null
+   },
+   {
+    "qid": "ad_s010",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 2,
+    "error": null
+   },
+   {
+    "qid": "ad_s071",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 4,
+    "error": null
+   },
+   {
+    "qid": "ad_s108",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 2,
+    "error": null
+   },
+   {
+    "qid": "ad_s018",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 4,
+    "error": null
+   },
+   {
+    "qid": "ad_s055",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 2,
+    "error": null
+   },
+   {
+    "qid": "ad_s069",
+    "expected": true,
+    "model": true,
+    "guard": false,
+    "claims": 1,
+    "error": null
+   }
+  ]
+ }
+}

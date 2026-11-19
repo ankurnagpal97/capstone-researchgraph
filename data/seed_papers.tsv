@@ -1,0 +1,59 @@
+# Curated seed list for AI ResearchGraph, Stage A.
+# Columns: arxiv_id <TAB> scope_tag <TAB> expected title keyword (ingest rejects the paper if the keyword is not in the arXiv title)
+# scope_tag: foundation (pre-2022, included on purpose) | rag_method | retrieval | multihop | graph_rag | evaluation | benchmark | survey
+2005.11401	foundation	Retrieval-Augmented Generation
+2002.08909	foundation	REALM
+2004.04906	foundation	Dense Passage Retrieval
+2007.01282	foundation	Generative Models
+2112.04426	foundation	retrieving from trillions
+2104.08663	foundation	BEIR
+2112.09118	foundation	Contrastive
+2004.12832	foundation	ColBERT
+1809.09600	foundation	HotpotQA
+2108.00573	foundation	MuSiQue
+2011.01060	foundation	Multi-hop
+2009.02252	foundation	KILT
+2112.01488	foundation	ColBERTv2
+2212.03533	retrieval	Text Embeddings
+2309.07597	retrieval	C-Pack
+2310.07554	retrieval	Retrieve Anything
+2312.06648	retrieval	Dense X Retrieval
+2409.04701	retrieval	Late Chunking
+2407.01449	retrieval	ColPali
+2304.09542	retrieval	ChatGPT Good at Search
+2212.10496	retrieval	Zero-Shot Dense Retrieval
+2303.07678	retrieval	Query2doc
+2208.03299	rag_method	Atlas
+2301.12652	rag_method	REPLUG
+2302.00083	rag_method	In-Context Retrieval-Augmented
+2310.11511	rag_method	Self-RAG
+2401.15884	rag_method	Corrective Retrieval
+2305.06983	rag_method	Active Retrieval
+2311.09210	rag_method	Chain-of-Note
+2310.04408	rag_method	RECOMP
+2403.14403	rag_method	Adaptive-RAG
+2406.15319	rag_method	LongRAG
+2407.02485	rag_method	RankRAG
+2407.08223	rag_method	Speculative RAG
+2407.16833	rag_method	Long-Context
+2307.03172	rag_method	Lost in the Middle
+2503.09516	rag_method	Search-R1
+2212.10509	multihop	Interleaving Retrieval
+2210.03350	multihop	Compositionality Gap
+2212.14024	multihop	Demonstrate-Search-Predict
+2305.15294	multihop	Iterative Retrieval-Generation Synergy
+2401.18059	graph_rag	RAPTOR
+2404.16130	graph_rag	From Local to Global
+2405.14831	graph_rag	HippoRAG
+2502.14802	graph_rag	From RAG to Memory
+2410.05779	graph_rag	LightRAG
+2408.08921	graph_rag	Graph Retrieval-Augmented Generation
+2309.15217	evaluation	RAGAS
+2311.09476	evaluation	ARES
+2408.08067	evaluation	RAGChecker
+2309.01431	benchmark	Benchmarking Large Language Models in Retrieval-Augmented Generation
+2401.15391	benchmark	MultiHop-RAG
+2409.12941	benchmark	Fact, Fetch, and Reason
+2401.17043	benchmark	CRUD-RAG
+2401.05856	evaluation	Seven Failure Points
+2312.10997	survey	Retrieval-Augmented Generation for Large Language Models

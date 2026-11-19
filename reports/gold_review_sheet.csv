@@ -1,0 +1,205 @@
+qid,type,question,expected_answerable,proposed_gold_papers,system_top5_papers,decision (keep / change / drop question),corrected_gold_paper_ids (space-separated),reviewer_notes
+q01,single_paper,How does Self-RAG use reflection tokens to decide when to retrieve and to critique its own generations?,True,"2310.11511 — Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection","2310.11511 — Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection
+2411.19443 — Auto-RAG: Autonomous Retrieval-Augmented Generation for Large Language Models",,,
+q02,single_paper,What does CRAG do when its retrieval evaluator judges the retrieved documents to be incorrect?,True,2401.15884 — Corrective Retrieval Augmented Generation,"2401.15884 — Corrective Retrieval Augmented Generation
+2407.08223 — Speculative RAG: Enhancing Retrieval Augmented Generation through Drafting
+2312.10997 — Retrieval-Augmented Generation for Large Language Models: A Survey
+2506.00054 — Retrieval-Augmented Generation: A Comprehensive Survey of Architectures, Enhancements, and Robustness Frontiers
+2504.10499 — Graph-based Approaches and Functionalities in Retrieval-Augmented Generation: A Comprehensive Survey",,,
+q03,single_paper,How does RAPTOR build a tree of summaries over a document collection?,True,2401.18059 — RAPTOR: Recursive Abstractive Processing for Tree-Organized Retrieval,"2401.18059 — RAPTOR: Recursive Abstractive Processing for Tree-Organized Retrieval
+2412.06206 — SiReRAG: Indexing Similar and Related Information for Multihop Reasoning",,,
+q04,single_paper,What happens to answer accuracy when the relevant document is placed in the middle of a long input context?,True,2307.03172 — Lost in the Middle: How Language Models Use Long Contexts,"2307.03172 — Lost in the Middle: How Language Models Use Long Contexts
+2407.01219 — Searching for Best Practices in Retrieval-Augmented Generation",,,
+q05,single_paper,How are hypothetical documents used for zero-shot dense retrieval without relevance labels?,True,2212.10496 — Precise Zero-Shot Dense Retrieval without Relevance Labels,"2212.10496 — Precise Zero-Shot Dense Retrieval without Relevance Labels
+2310.20158 — GAR-meets-RAG Paradigm for Zero-Shot Information Retrieval
+2404.10981 — A Survey on Retrieval-Augmented Text Generation for Large Language Models
+2204.07496 — Improving Passage Retrieval with Zero-Shot Question Generation",,,
+q06,single_paper,How can community summaries of an entity graph answer global sensemaking questions over a whole corpus?,True,2404.16130 — From Local to Global: A Graph RAG Approach to Query-Focused Summarization,"2404.16130 — From Local to Global: A Graph RAG Approach to Query-Focused Summarization
+2502.09891 — ArchRAG: Attributed Community-based Hierarchical Retrieval-Augmented Generation
+2504.10499 — Graph-based Approaches and Functionalities in Retrieval-Augmented Generation: A Comprehensive Survey
+2509.10697 — A Survey on Retrieval And Structuring Augmented Generation with Large Language Models",,,
+q07,comparison,How do RAGAS and ARES differ in how they evaluate RAG systems?,True,"2309.15217 — Ragas: Automated Evaluation of Retrieval Augmented Generation
+2311.09476 — ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems","2311.09476 — ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems
+2508.06401 — A Systematic Literature Review of Retrieval-Augmented Generation: Techniques, Metrics, and Challenges
+2401.17043 — CRUD-RAG: A Comprehensive Chinese Benchmark for Retrieval-Augmented Generation of Large Language Models
+2309.15217 — Ragas: Automated Evaluation of Retrieval Augmented Generation",,,
+q08,comparison,Compare how IRCoT and FLARE decide when to retrieve during generation.,True,"2212.10509 — Interleaving Retrieval with Chain-of-Thought Reasoning for Knowledge-Intensive Multi-Step Questions
+2305.06983 — Active Retrieval Augmented Generation","2501.14342 — Chain-of-Retrieval Augmented Generation
+2404.10981 — A Survey on Retrieval-Augmented Text Generation for Large Language Models
+2411.19443 — Auto-RAG: Autonomous Retrieval-Augmented Generation for Large Language Models
+2305.06983 — Active Retrieval Augmented Generation
+2312.10997 — Retrieval-Augmented Generation for Large Language Models: A Survey",,,
+q09,comparison,How do late-interaction retrievers like ColBERT differ from single-vector dual encoders like DPR?,True,"2004.12832 — ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT
+2004.04906 — Dense Passage Retrieval for Open-Domain Question Answering","2112.01488 — ColBERTv2: Effective and Efficient Retrieval via Lightweight Late Interaction
+2104.08663 — BEIR: A Heterogenous Benchmark for Zero-shot Evaluation of Information Retrieval Models
+2004.12832 — ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT
+2502.02464 — Rankify: A Comprehensive Python Toolkit for Retrieval, Re-Ranking, and Retrieval-Augmented Generation
+2112.09118 — Unsupervised Dense Information Retrieval with Contrastive Learning",,,
+q10,comparison,Which approaches decide adaptively whether retrieval is needed for a given query?,True,"2403.14403 — Adaptive-RAG: Learning to Adapt Retrieval-Augmented Large Language Models through Question Complexity
+2310.11511 — Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection
+2305.06983 — Active Retrieval Augmented Generation","2403.14403 — Adaptive-RAG: Learning to Adapt Retrieval-Augmented Large Language Models through Question Complexity
+2407.01219 — Searching for Best Practices in Retrieval-Augmented Generation
+2504.10499 — Graph-based Approaches and Functionalities in Retrieval-Augmented Generation: A Comprehensive Survey
+2512.02038 — Deep Research: A Systematic Survey
+2009.12756 — Answering Complex Open-Domain Questions with Multi-Hop Dense Retrieval",,,
+q11,multihop,Which methods interleave retrieval with reasoning steps for multi-hop questions such as HotpotQA or MuSiQue?,True,"2212.10509 — Interleaving Retrieval with Chain-of-Thought Reasoning for Knowledge-Intensive Multi-Step Questions
+2305.15294 — Enhancing Retrieval-Augmented Large Language Models with Iterative Retrieval-Generation Synergy
+2210.03350 — Measuring and Narrowing the Compositionality Gap in Language Models","2212.10509 — Interleaving Retrieval with Chain-of-Thought Reasoning for Knowledge-Intensive Multi-Step Questions
+2407.08223 — Speculative RAG: Enhancing Retrieval Augmented Generation through Drafting
+2305.15294 — Enhancing Retrieval-Augmented Large Language Models with Iterative Retrieval-Generation Synergy
+2009.12756 — Answering Complex Open-Domain Questions with Multi-Hop Dense Retrieval
+2405.14831 — HippoRAG: Neurobiologically Inspired Long-Term Memory for Large Language Models",,,
+q12,multihop,How does HippoRAG 2 build on the original HippoRAG?,True,"2502.14802 — From RAG to Memory: Non-Parametric Continual Learning for Large Language Models
+2405.14831 — HippoRAG: Neurobiologically Inspired Long-Term Memory for Large Language Models","2502.14802 — From RAG to Memory: Non-Parametric Continual Learning for Large Language Models
+2405.14831 — HippoRAG: Neurobiologically Inspired Long-Term Memory for Large Language Models
+2412.06206 — SiReRAG: Indexing Similar and Related Information for Multihop Reasoning
+2503.04338 — In-depth Analysis of Graph-based RAG in a Unified Framework",,,
+q13,multihop,What does LightRAG change compared with the earlier GraphRAG approach?,True,"2410.05779 — LightRAG: Simple and Fast Retrieval-Augmented Generation
+2404.16130 — From Local to Global: A Graph RAG Approach to Query-Focused Summarization","2410.05779 — LightRAG: Simple and Fast Retrieval-Augmented Generation
+2502.14802 — From RAG to Memory: Non-Parametric Continual Learning for Large Language Models
+2503.04338 — In-depth Analysis of Graph-based RAG in a Unified Framework
+2404.16130 — From Local to Global: A Graph RAG Approach to Query-Focused Summarization
+2408.08921 — Graph Retrieval-Augmented Generation: A Survey",,,
+q14,metadata,Which benchmark evaluates RAG on multi-hop queries built from news articles?,True,2401.15391 — MultiHop-RAG: Benchmarking Retrieval-Augmented Generation for Multi-Hop Queries,"2507.06838 — Shifting from Ranking to Set Selection for Retrieval Augmented Generation
+2401.15391 — MultiHop-RAG: Benchmarking Retrieval-Augmented Generation for Multi-Hop Queries
+2401.17043 — CRUD-RAG: A Comprehensive Chinese Benchmark for Retrieval-Augmented Generation of Large Language Models
+2501.06713 — MiniRAG: Towards Extremely Simple Retrieval-Augmented Generation
+2309.01431 — Benchmarking Large Language Models in Retrieval-Augmented Generation",,,
+q15,unanswerable,What is the best RAG method for medical diagnosis in hospitals?,False,(none: should be declined),"2407.01219 — Searching for Best Practices in Retrieval-Augmented Generation
+2405.14831 — HippoRAG: Neurobiologically Inspired Long-Term Memory for Large Language Models
+2408.08067 — RAGChecker: A Fine-grained Framework for Diagnosing Retrieval-Augmented Generation
+2504.04062 — QE-RAG: A Robust Retrieval-Augmented Generation Benchmark for Query Entry Errors
+2503.04338 — In-depth Analysis of Graph-based RAG in a Unified Framework",,,
+q16,unanswerable,What accuracy does Self-RAG reach on HotpotQA when GPT-5 is the generator?,False,(none: should be declined),"2505.02811 — Knowing You Don't Know: Learning When to Continue Search in Multi-round RAG through Self-Practicing
+2401.15884 — Corrective Retrieval Augmented Generation
+2310.11511 — Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection
+2501.07861 — ReARTeR: Retrieval-Augmented Reasoning with Trustworthy Process Rewarding
+2506.00054 — Retrieval-Augmented Generation: A Comprehensive Survey of Architectures, Enhancements, and Robustness Frontiers",,,
+q17,unanswerable,How much does retrieval-augmented generation reduce electricity costs in data centres?,False,(none: should be declined),"2402.19473 — Retrieval-Augmented Generation for AI-Generated Content: A Survey
+2501.00309 — Retrieval-Augmented Generation with Graphs (GraphRAG)
+2209.14290 — FiD-Light: Efficient and Effective Retrieval-Augmented Text Generation
+2504.10499 — Graph-based Approaches and Functionalities in Retrieval-Augmented Generation: A Comprehensive Survey
+2009.08553 — Generation-Augmented Retrieval for Open-domain Question Answering",,,
+q18,single_paper,"How does DRAGIN decide when to retrieve and what to search for, based on the model's real-time information needs?",True,2403.10081 — DRAGIN: Dynamic Retrieval Augmented Generation based on the Information Needs of Large Language Models,"2403.10081 — DRAGIN: Dynamic Retrieval Augmented Generation based on the Information Needs of Large Language Models
+2508.06401 — A Systematic Literature Review of Retrieval-Augmented Generation: Techniques, Metrics, and Challenges
+2308.07107 — Large Language Models for Information Retrieval: A Survey
+2505.16834 — SimpleDeepSearcher: Deep Information Seeking via Web-Powered Reasoning Trajectory Synthesis",,,
+q19,single_paper,How does RAFT train a model to ignore distractor documents in domain-specific RAG?,True,2403.10131 — RAFT: Adapting Language Model to Domain Specific RAG,2403.10131 — RAFT: Adapting Language Model to Domain Specific RAG,,,
+q20,single_paper,What does the ALCE benchmark measure about LLMs generating text with citations?,True,2305.14627 — Enabling Large Language Models to Generate Text with Citations,"2305.14627 — Enabling Large Language Models to Generate Text with Citations
+2401.17043 — CRUD-RAG: A Comprehensive Chinese Benchmark for Retrieval-Augmented Generation of Large Language Models
+2309.01431 — Benchmarking Large Language Models in Retrieval-Augmented Generation
+2404.14851 — From Matching to Generation: A Survey on Generative Information Retrieval
+2512.02038 — Deep Research: A Systematic Survey",,,
+q21,single_paper,How does the Rewrite-Retrieve-Read framework rewrite queries before retrieval?,True,2305.14283 — Query Rewriting for Retrieval-Augmented Large Language Models,"2305.14283 — Query Rewriting for Retrieval-Augmented Large Language Models
+2407.01219 — Searching for Best Practices in Retrieval-Augmented Generation
+2501.15228 — Improving Retrieval-Augmented Generation through Multi-Agent Reinforcement Learning
+2312.10997 — Retrieval-Augmented Generation for Large Language Models: A Survey
+2407.21059 — Modular RAG: Transforming RAG Systems into LEGO-like Reconfigurable Frameworks",,,
+q22,single_paper,"What combination of RAG components did the best-practices study recommend after testing chunking, retrieval and reranking options?",True,2407.01219 — Searching for Best Practices in Retrieval-Augmented Generation,"2407.01219 — Searching for Best Practices in Retrieval-Augmented Generation
+2406.00456 — Mix-of-Granularity: Optimize the Chunking Granularity for Retrieval-Augmented Generation
+2502.11371 — RAG vs. GraphRAG: A Systematic Evaluation and Key Insights
+2404.10981 — A Survey on Retrieval-Augmented Text Generation for Large Language Models
+2401.15391 — MultiHop-RAG: Benchmarking Retrieval-Augmented Generation for Multi-Hop Queries",,,
+q23,single_paper,How can retrieval-augmented models be made robust to irrelevant retrieved context?,True,2310.01558 — Making Retrieval-Augmented Language Models Robust to Irrelevant Context,2310.01558 — Making Retrieval-Augmented Language Models Robust to Irrelevant Context,,,
+q24,single_paper,How does Mix-of-Granularity choose the chunk size used for retrieval?,True,2406.00456 — Mix-of-Granularity: Optimize the Chunking Granularity for Retrieval-Augmented Generation,"2406.00456 — Mix-of-Granularity: Optimize the Chunking Granularity for Retrieval-Augmented Generation
+2407.01219 — Searching for Best Practices in Retrieval-Augmented Generation
+2401.17043 — CRUD-RAG: A Comprehensive Chinese Benchmark for Retrieval-Augmented Generation of Large Language Models
+2304.06762 — Shall We Pretrain Autoregressive Language Models with Retrieval? A Comprehensive Study",,,
+q25,comparison,How do Search-R1 and ZeroSearch differ in how they train LLMs to use search with reinforcement learning?,True,"2503.09516 — Search-R1: Training LLMs to Reason and Leverage Search Engines with Reinforcement Learning
+2505.04588 — ZeroSearch: Incentivize the Search Capability of LLMs without Searching","2503.09516 — Search-R1: Training LLMs to Reason and Leverage Search Engines with Reinforcement Learning
+2505.04588 — ZeroSearch: Incentivize the Search Capability of LLMs without Searching",,,
+q26,comparison,Compare RQ-RAG and the Rewrite-Retrieve-Read approach to query refinement.,True,"2404.00610 — RQ-RAG: Learning to Refine Queries for Retrieval Augmented Generation
+2305.14283 — Query Rewriting for Retrieval-Augmented Large Language Models","2501.15228 — Improving Retrieval-Augmented Generation through Multi-Agent Reinforcement Learning
+2404.00610 — RQ-RAG: Learning to Refine Queries for Retrieval Augmented Generation
+2506.00054 — Retrieval-Augmented Generation: A Comprehensive Survey of Architectures, Enhancements, and Robustness Frontiers
+2310.20158 — GAR-meets-RAG Paradigm for Zero-Shot Information Retrieval
+2404.10981 — A Survey on Retrieval-Augmented Text Generation for Large Language Models",,,
+q27,comparison,"How do RAPTOR, GraphRAG and HippoRAG organise the corpus differently before retrieval?",True,"2401.18059 — RAPTOR: Recursive Abstractive Processing for Tree-Organized Retrieval
+2404.16130 — From Local to Global: A Graph RAG Approach to Query-Focused Summarization
+2405.14831 — HippoRAG: Neurobiologically Inspired Long-Term Memory for Large Language Models","2502.14802 — From RAG to Memory: Non-Parametric Continual Learning for Large Language Models
+2412.06206 — SiReRAG: Indexing Similar and Related Information for Multihop Reasoning
+2502.11371 — RAG vs. GraphRAG: A Systematic Evaluation and Key Insights
+2401.18059 — RAPTOR: Recursive Abstractive Processing for Tree-Organized Retrieval
+2405.14831 — HippoRAG: Neurobiologically Inspired Long-Term Memory for Large Language Models",,,
+q28,comparison,"How do REPLUG and RA-DIT differ in whether they train the retriever, the language model, or both?",True,"2301.12652 — REPLUG: Retrieval-Augmented Black-Box Language Models
+2310.01352 — RA-DIT: Retrieval-Augmented Dual Instruction Tuning","2301.12652 — REPLUG: Retrieval-Augmented Black-Box Language Models
+2310.01352 — RA-DIT: Retrieval-Augmented Dual Instruction Tuning
+2402.18150 — Unsupervised Information Refinement Training of Large Language Models for Retrieval-Augmented Generation",,,
+q29,comparison,How does multi-hop dense retrieval differ from interleaving retrieval with chain-of-thought for multi-hop QA?,True,"2009.12756 — Answering Complex Open-Domain Questions with Multi-Hop Dense Retrieval
+2212.10509 — Interleaving Retrieval with Chain-of-Thought Reasoning for Knowledge-Intensive Multi-Step Questions","2009.12756 — Answering Complex Open-Domain Questions with Multi-Hop Dense Retrieval
+2212.10509 — Interleaving Retrieval with Chain-of-Thought Reasoning for Knowledge-Intensive Multi-Step Questions",,,
+q30,multihop,"Which later methods extend Self-RAG's idea of adaptive retrieval, and what do they change?",True,"2310.11511 — Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection
+2401.15884 — Corrective Retrieval Augmented Generation
+2403.10081 — DRAGIN: Dynamic Retrieval Augmented Generation based on the Information Needs of Large Language Models
+2405.18727 — CtrlA: Adaptive Retrieval-Augmented Generation via Inherent Control","2507.06838 — Shifting from Ranking to Set Selection for Retrieval Augmented Generation
+2312.10997 — Retrieval-Augmented Generation for Large Language Models: A Survey
+2405.18727 — CtrlA: Adaptive Retrieval-Augmented Generation via Inherent Control
+2403.14403 — Adaptive-RAG: Learning to Adapt Retrieval-Augmented Large Language Models through Question Complexity
+2501.15228 — Improving Retrieval-Augmented Generation through Multi-Agent Reinforcement Learning",,,
+q31,multihop,How did dense retrieval evolve from DPR to later training methods like ANCE and RocketQA?,True,"2004.04906 — Dense Passage Retrieval for Open-Domain Question Answering
+2007.00808 — Approximate Nearest Neighbor Negative Contrastive Learning for Dense Text Retrieval
+2010.08191 — RocketQA: An Optimized Training Approach to Dense Passage Retrieval for Open-Domain Question Answering","2010.08191 — RocketQA: An Optimized Training Approach to Dense Passage Retrieval for Open-Domain Question Answering
+2509.10697 — A Survey on Retrieval And Structuring Augmented Generation with Large Language Models
+2007.00808 — Approximate Nearest Neighbor Negative Contrastive Learning for Dense Text Retrieval
+2104.08663 — BEIR: A Heterogenous Benchmark for Zero-shot Evaluation of Information Retrieval Models",,,
+q32,multihop,Which graph-based RAG methods build on GraphRAG's community summaries?,True,"2404.16130 — From Local to Global: A Graph RAG Approach to Query-Focused Summarization
+2410.05779 — LightRAG: Simple and Fast Retrieval-Augmented Generation
+2502.09891 — ArchRAG: Attributed Community-based Hierarchical Retrieval-Augmented Generation","2404.16130 — From Local to Global: A Graph RAG Approach to Query-Focused Summarization
+2502.11371 — RAG vs. GraphRAG: A Systematic Evaluation and Key Insights
+2504.10499 — Graph-based Approaches and Functionalities in Retrieval-Augmented Generation: A Comprehensive Survey
+2502.09891 — ArchRAG: Attributed Community-based Hierarchical Retrieval-Augmented Generation
+2407.13193 — Retrieval-Augmented Generation for Natural Language Processing: A Survey",,,
+q33,multihop,How did open-domain QA move from DrQA's retriever-reader pipeline to learned retrievers like ORQA and REALM?,True,"1704.00051 — Reading Wikipedia to Answer Open-Domain Questions
+1906.00300 — Latent Retrieval for Weakly Supervised Open Domain Question Answering
+2002.08909 — REALM: Retrieval-Augmented Language Model Pre-Training","2002.08909 — REALM: Retrieval-Augmented Language Model Pre-Training
+2212.10509 — Interleaving Retrieval with Chain-of-Thought Reasoning for Knowledge-Intensive Multi-Step Questions
+1906.00300 — Latent Retrieval for Weakly Supervised Open Domain Question Answering
+2501.15228 — Improving Retrieval-Augmented Generation through Multi-Agent Reinforcement Learning
+2010.08191 — RocketQA: An Optimized Training Approach to Dense Passage Retrieval for Open-Domain Question Answering",,,
+q34,disagreement,Do long-context LLMs make retrieval-augmented generation unnecessary?,True,"2407.16833 — Retrieval Augmented Generation or Long-Context LLMs? A Comprehensive Study and Hybrid Approach
+2310.03025 — Retrieval meets Long Context Large Language Models
+2307.03172 — Lost in the Middle: How Language Models Use Long Contexts","2407.13193 — Retrieval-Augmented Generation for Natural Language Processing: A Survey
+2407.16833 — Retrieval Augmented Generation or Long-Context LLMs? A Comprehensive Study and Hybrid Approach
+2406.15319 — LongRAG: Enhancing Retrieval-Augmented Generation with Long-context LLMs
+2312.10997 — Retrieval-Augmented Generation for Large Language Models: A Survey
+2409.05591 — MemoRAG: Boosting Long Context Processing with Global Memory-Enhanced Retrieval Augmentation",,,
+q35,disagreement,Does graph-based RAG consistently outperform standard vector RAG?,True,"2502.11371 — RAG vs. GraphRAG: A Systematic Evaluation and Key Insights
+2503.04338 — In-depth Analysis of Graph-based RAG in a Unified Framework
+2404.16130 — From Local to Global: A Graph RAG Approach to Query-Focused Summarization","2503.04338 — In-depth Analysis of Graph-based RAG in a Unified Framework
+2410.05779 — LightRAG: Simple and Fast Retrieval-Augmented Generation
+2602.03442 — A-RAG: Scaling Agentic Retrieval-Augmented Generation via Hierarchical Retrieval Interfaces
+2409.05591 — MemoRAG: Boosting Long Context Processing with Global Memory-Enhanced Retrieval Augmentation
+2502.11371 — RAG vs. GraphRAG: A Systematic Evaluation and Key Insights",,,
+q36,disagreement,Does adding more retrieved passages always improve answer quality?,True,"2307.03172 — Lost in the Middle: How Language Models Use Long Contexts
+2310.01558 — Making Retrieval-Augmented Language Models Robust to Irrelevant Context
+2407.16833 — Retrieval Augmented Generation or Long-Context LLMs? A Comprehensive Study and Hybrid Approach","2305.14627 — Enabling Large Language Models to Generate Text with Citations
+2204.07496 — Improving Passage Retrieval with Zero-Shot Question Generation
+2407.08223 — Speculative RAG: Enhancing Retrieval Augmented Generation through Drafting
+2308.07107 — Large Language Models for Information Retrieval: A Survey
+2310.05002 — Self-Knowledge Guided Retrieval Augmentation for Large Language Models",,,
+q37,metadata,Which survey covers methods for evaluating retrieval-augmented generation systems?,True,2405.07437 — Evaluation of Retrieval-Augmented Generation: A Survey,"2506.00054 — Retrieval-Augmented Generation: A Comprehensive Survey of Architectures, Enhancements, and Robustness Frontiers
+2405.07437 — Evaluation of Retrieval-Augmented Generation: A Survey
+2404.10981 — A Survey on Retrieval-Augmented Text Generation for Large Language Models
+2312.10997 — Retrieval-Augmented Generation for Large Language Models: A Survey
+2508.06401 — A Systematic Literature Review of Retrieval-Augmented Generation: Techniques, Metrics, and Challenges",,,
+q38,metadata,"Which paper proposes a modular, LEGO-like framework for reconfigurable RAG systems?",True,2407.21059 — Modular RAG: Transforming RAG Systems into LEGO-like Reconfigurable Frameworks,2407.21059 — Modular RAG: Transforming RAG Systems into LEGO-like Reconfigurable Frameworks,,,
+q39,single_paper,How did the first BERT-based passage re-ranker work on MS MARCO?,True,1901.04085 — Passage Re-ranking with BERT,"1901.04085 — Passage Re-ranking with BERT
+2004.12832 — ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT
+2304.09542 — Is ChatGPT Good at Search? Investigating Large Language Models as Re-Ranking Agents
+2407.01219 — Searching for Best Practices in Retrieval-Augmented Generation
+2104.08663 — BEIR: A Heterogenous Benchmark for Zero-shot Evaluation of Information Retrieval Models",,,
+q40,unanswerable,Which RAG method has the lowest carbon footprint per query?,False,(none: should be declined),"2501.15915 — Parametric Retrieval Augmented Generation
+2407.13193 — Retrieval-Augmented Generation for Natural Language Processing: A Survey
+2504.04062 — QE-RAG: A Robust Retrieval-Augmented Generation Benchmark for Query Entry Errors
+2407.08223 — Speculative RAG: Enhancing Retrieval Augmented Generation through Drafting
+2502.11371 — RAG vs. GraphRAG: A Systematic Evaluation and Key Insights",,,
+q41,unanswerable,What retrieval method does OpenAI use inside ChatGPT's browsing feature?,False,(none: should be declined),"2310.05002 — Self-Knowledge Guided Retrieval Augmentation for Large Language Models
+2508.06401 — A Systematic Literature Review of Retrieval-Augmented Generation: Techniques, Metrics, and Challenges
+2404.00610 — RQ-RAG: Learning to Refine Queries for Retrieval Augmented Generation
+2305.17331 — Augmentation-Adapted Retriever Improves Generalization of Language Models as Generic Plug-In
+2304.09542 — Is ChatGPT Good at Search? Investigating Large Language Models as Re-Ranking Agents",,,
+q42,unanswerable,What was the exact recall@10 of RAPTOR on the Natural Questions test set with a 70B reader?,False,(none: should be declined),"2405.14831 — HippoRAG: Neurobiologically Inspired Long-Term Memory for Large Language Models
+2406.13629 — InstructRAG: Instructing Retrieval-Augmented Generation via Self-Synthesized Rationales
+2401.18059 — RAPTOR: Recursive Abstractive Processing for Tree-Organized Retrieval
+2302.00083 — In-Context Retrieval-Augmented Language Models
+1704.00051 — Reading Wikipedia to Answer Open-Domain Questions",,,

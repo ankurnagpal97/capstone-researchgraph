@@ -1,0 +1,42 @@
+{
+ "run_at": "2026-11-14 17:56",
+ "dataset": "QASPER v0.3 test (CC BY 4.0)",
+ "n_papers": 60,
+ "n_questions": 194,
+ "seed": 7,
+ "reranker": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+ "summary": [
+  {
+   "system": "B0 BM25",
+   "hit1": 0.309,
+   "hit3": 0.531,
+   "hit5": 0.67,
+   "recall5": 0.465,
+   "mrr": 0.468
+  },
+  {
+   "system": "B1 Dense",
+   "hit1": 0.366,
+   "hit3": 0.639,
+   "hit5": 0.768,
+   "recall5": 0.537,
+   "mrr": 0.538
+  },
+  {
+   "system": "B2 Hybrid",
+   "hit1": 0.412,
+   "hit3": 0.675,
+   "hit5": 0.789,
+   "recall5": 0.564,
+   "mrr": 0.571
+  },
+  {
+   "system": "B3 Hybrid+rerank",
+   "hit1": 0.454,
+   "hit3": 0.747,
+   "hit5": 0.845,
+   "recall5": 0.599,
+   "mrr": 0.622
+  }
+ ]
+}

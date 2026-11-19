@@ -9,3 +9,8 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 .DS_Store
+# ResearchGraph data: PDFs and derived text are not redistributed (arXiv licenses vary per paper)
+data/raw/
+data/*.db
+data/index/
+logs/

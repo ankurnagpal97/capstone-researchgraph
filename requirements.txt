@@ -1,0 +1,6 @@
+ipykernel==6.31.0
+numpy==2.0.2
+pandas==2.3.3
+PyMuPDF==1.26.5
+pytest==8.4.2
+streamlit==1.50.0
