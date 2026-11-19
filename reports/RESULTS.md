@@ -66,19 +66,19 @@ Paper Recall@10 by question type:
 | B2 Hybrid | 0.412 | 0.675 | 0.789 | 0.564 | 0.571 |
 | B3 Hybrid+rerank | 0.454 | 0.747 | 0.845 | 0.599 | 0.622 |
 
-## End-to-end answers — curated set, B3 Hybrid+rerank (n = 42)
+## End-to-end answers — curated set, B3 Hybrid+rerank + per-entity retrieval (n = 42)
 
 | Measure | Value |
 |---|---|
 | Declined unanswerable questions | 4/6 |
-| Answered answerable questions | 36/36 |
+| Answered answerable questions | 35/36 |
 | Invalid JSON replies | 0 |
 | Citation IDs that exist in the evidence | 1.0 |
-| Claims without a valid citation | 0/164 |
-| Gold papers among cited passages | 0.697 |
-| Auto-judged: supported / partial / not supported | 0.89 / 0.055 / 0.055 |
-| Latency p50 / p95 (s) | 7.04 / 12.19 |
-| Mean tokens per answer | 2373 |
+| Claims without a valid citation | 0/154 |
+| Gold papers among cited passages | 0.752 |
+| Auto-judged: supported / partial / not supported | 0.916 / 0.058 / 0.026 |
+| Latency p50 / p95 (s) | 8.08 / 13.67 |
+| Mean tokens per answer | 2523 |
 
 *auto_support_* are Qwen3-8B judging its own answers: an estimate. Human labels in reports/citation_audit_sample.csv are the real measure.*
 
@@ -88,5 +88,6 @@ Human citation-support labels: fill in `reports/citation_audit_sample.csv` (colu
 
 | Question | Type | Expected answerable | Model said | Note |
 |---|---|---|---|---|
-| q15 | unanswerable | False | True | The best RAG method for medical diagnosis in hospitals is the Best Performance Practice, which includes incorporating a  |
-| q41 | unanswerable | False | True | OpenAI uses dynamic retrieval calls via system prompts for ChatGPT's browsing feature, as described in the passage. |
+| q33 | multihop | True | False | Open-domain QA evolved from DrQA's retriever-reader pipeline to learned retrievers like ORQA and REALM by integrating en |
+| q40 | unanswerable | False | True | The passage does not directly state which RAG method has the lowest carbon footprint per query. However, it mentions tha |
+| q41 | unanswerable | False | True | OpenAI uses a generic retrieval plug-in inside ChatGPT's browsing feature, which retrieves the most relevant document fr |

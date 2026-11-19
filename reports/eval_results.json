@@ -3005,21 +3005,21 @@
  },
  "answers": {
   "set": "curated",
-  "system": "B3 Hybrid+rerank",
-  "prompt": "answer-v2",
+  "system": "B3 Hybrid+rerank + per-entity retrieval",
+  "prompt": "answer-v3",
   "n": 42,
   "abstention_on_unanswerable": "4/6",
-  "answered_when_answerable": "36/36",
+  "answered_when_answerable": "35/36",
   "json_failures": 0,
   "citation_id_validity": 1.0,
-  "claims_without_valid_citation": "0/164",
-  "auto_support_supported": 0.89,
-  "auto_support_partial": 0.055,
-  "auto_support_not_supported": 0.055,
-  "gold_paper_recall_in_citations": 0.697,
-  "latency_p50_s": 7.04,
-  "latency_p95_s": 12.19,
-  "mean_total_tokens": 2373,
+  "claims_without_valid_citation": "0/154",
+  "auto_support_supported": 0.916,
+  "auto_support_partial": 0.058,
+  "auto_support_not_supported": 0.026,
+  "gold_paper_recall_in_citations": 0.752,
+  "latency_p50_s": 8.08,
+  "latency_p95_s": 13.67,
+  "mean_total_tokens": 2523,
   "note": "auto_support_* are Qwen3-8B judging its own answers: an estimate. Human labels in reports/citation_audit_sample.csv are the real measure.",
   "per_question": [
    {
@@ -3029,18 +3029,19 @@
     "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 3,
+    "n_claims": 4,
     "unsupported_citation": 0,
     "judge_labels": [
+     "supported",
      "supported",
      "supported",
      "supported"
     ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 5.55,
-    "total_tokens": 1738,
-    "short_answer": "Self-RAG uses reflection tokens to decide when to retrieve and critique its own generations. Specifically, it categorizes reflection tokens into retrieval and critique tokens. Retrieval tokens are used to determine if retrieving additional information would be helpful, while critique tokens are used to evaluate the quality of the generated output and select the best one."
+    "latency_s": 7.25,
+    "total_tokens": 1947,
+    "short_answer": "Self-RAG uses reflection tokens to decide when to retrieve and to critique its own generations. Specifically, it categorizes reflection tokens into retrieval and critique tokens. Retrieval tokens are used to determine if retrieving additional information would be helpful, while critique tokens are used to evaluate the quality of the generated output and select the best one."
    },
    {
     "qid": "q02",
@@ -3056,9 +3057,9 @@
     ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 3.34,
-    "total_tokens": 1969,
-    "short_answer": "When the retrieval evaluator in CRAG judges the retrieved documents to be incorrect, the retrieved documents are discarded, and web searches are resorted to as complementary knowledge sources for corrections."
+    "latency_s": 3.27,
+    "total_tokens": 2125,
+    "short_answer": "When CRAG's retrieval evaluator judges the retrieved documents to be incorrect, the retrieved documents are discarded, and web searches are resorted to as complementary knowledge sources for corrections."
    },
    {
     "qid": "q03",
@@ -3076,9 +3077,9 @@
     ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 5.81,
-    "total_tokens": 2069,
-    "short_answer": "RAPTOR builds a tree of summaries over a document collection by recursively embedding, clustering, and summarizing text chunks. The process starts with text chunks as leaf nodes, which are clustered, summarized, and re-embedded iteratively until further clustering is infeasible, forming a multi-layered tree structure."
+    "latency_s": 5.88,
+    "total_tokens": 2200,
+    "short_answer": "RAPTOR builds a tree of summaries over a document collection by recursively embedding, clustering, and summarizing text chunks. The process starts with text chunks as leaf nodes, which are clustered, summarized, and re-embedded iteratively until further clustering is infeasible, forming a structured, multi-layered tree representation."
    },
    {
     "qid": "q04",
@@ -3095,8 +3096,8 @@
     ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 4.6,
-    "total_tokens": 1476,
+    "latency_s": 5.21,
+    "total_tokens": 1627,
     "short_answer": "When the relevant document is placed in the middle of a long input context, answer accuracy decreases due to primacy and recency biases in language models. For example, GPT-3.5Turbo's performance can drop by more than 20% in certain scenarios."
    },
    {
@@ -3106,18 +3107,19 @@
     "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 3,
+    "n_claims": 4,
     "unsupported_citation": 0,
     "judge_labels": [
      "supported",
      "supported",
-     "supported"
+     "supported",
+     "not_supported"
     ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 6.36,
-    "total_tokens": 2463,
-    "short_answer": "Hypothetical documents are used for zero-shot dense retrieval without relevance labels by generating them through an instruction-following language model. These documents are not real and may contain false details, but they capture relevance patterns. The generated documents are then encoded into embeddings using a contrastive encoder, which filters out incorrect details and identifies similar real documents in the corpus."
+    "latency_s": 7.51,
+    "total_tokens": 2653,
+    "short_answer": "Hypothetical documents are used for zero-shot dense retrieval without relevance labels by generating them through an instruction-following language model. These documents are not real and may contain false details, but they capture relevance patterns. The generated documents are then encoded into embedding vectors using an unsupervised contrastive encoder, which filters out incorrect details and identifies similar real documents in the corpus."
    },
    {
     "qid": "q06",
@@ -3137,9 +3139,9 @@
     ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 7.96,
-    "total_tokens": 2273,
-    "short_answer": "Community summaries of an entity graph can answer global sensemaking questions over a whole corpus by first constructing a knowledge graph, partitioning it into communities, and generating summaries at each level. These summaries are then used in a map-reduce process to provide partial answers, which are combined to form a final global answer. This approach enables efficient and comprehensive understanding of large-scale datasets."
+    "latency_s": 7.42,
+    "total_tokens": 2387,
+    "short_answer": "Community summaries of an entity graph can answer global sensemaking questions over a whole corpus by first constructing a knowledge graph, partitioning it into communities, and generating summaries at each level. These summaries are then combined through a map-reduce process to provide comprehensive answers."
    },
    {
     "qid": "q07",
@@ -3148,20 +3150,19 @@
     "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 5,
+    "n_claims": 4,
     "unsupported_citation": 0,
     "judge_labels": [
      "supported",
      "supported",
-     "not_supported",
      "supported",
      "supported"
     ],
-    "gold_cited_recall": 0.5,
+    "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 6.66,
-    "total_tokens": 2548,
-    "short_answer": "ARES and RAGAS differ in their evaluation approaches. ARES provides more accurate rankings and uses domain-adaptive techniques and PPI, while RAGAS relies on automated semantic similarity measurements and predefined prompts. ARES emphasizes detailed, human-aligned assessment with minimal human annotations, whereas RAGAS prioritizes operational efficiency."
+    "latency_s": 9.47,
+    "total_tokens": 2825,
+    "short_answer": "RAGAS and ARES differ in their evaluation approaches for RAG systems. RAGAS focuses on automated, reference-free evaluation using semantic similarity measurements, while ARES employs synthetic training data and lightweight LM judges to assess RAG components. ARES also uses prediction-powered inference (PPI) to improve evaluation accuracy and provides confidence intervals for its scores. Additionally, ARES demonstrates higher ranking accuracy compared to RAGAS across multiple datasets."
    },
    {
     "qid": "q08",
@@ -3170,17 +3171,18 @@
     "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 2,
+    "n_claims": 3,
     "unsupported_citation": 0,
     "judge_labels": [
      "supported",
+     "supported",
      "supported"
     ],
-    "gold_cited_recall": 0.0,
+    "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 5.14,
-    "total_tokens": 2407,
-    "short_answer": "FLARE and IRCoT decide when to retrieve during generation using different mechanisms. FLARE uses a confidence-based active retrieval mechanism, dynamically triggering retrieval when the model generates low-confidence tokens. IRCoT integrates retrieval with chain-of-thought (CoT) reasoning, interleaving these processes to ensure that each retrieval step supports the ongoing reasoning task."
+    "latency_s": 8.08,
+    "total_tokens": 2817,
+    "short_answer": "IRCoT and FLARE both use retrieval during generation, but they differ in their decision-making mechanisms. IRCoT interleaves retrieval with chain-of-thought reasoning, iteratively retrieving and reasoning until a termination criterion is met. FLARE, on the other hand, uses a confidence-based active retrieval mechanism, dynamically triggering retrieval when the model generates low-confidence tokens."
    },
    {
     "qid": "q09",
@@ -3189,23 +3191,21 @@
     "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 8,
+    "n_claims": 6,
     "unsupported_citation": 0,
     "judge_labels": [
      "supported",
      "supported",
      "supported",
+     "supported",
      "partial",
-     "supported",
-     "supported",
-     "supported",
      "supported"
     ],
     "gold_cited_recall": 0.5,
     "graph_used": false,
-    "latency_s": 12.62,
-    "total_tokens": 3154,
-    "short_answer": "Late-interaction retrievers like ColBERT differ from single-vector dual encoders like DPR by using token-level interactions to model relevance, which allows for more expressive relevance modeling but increases storage requirements. Single-vector models like DPR rely on a single dot product to capture query-document relationships, while late-interaction models decompose relevance into token-level computations. ColBERTv2, a late-interaction retriever, benefits from distillation and denoised supervision, whereas single-vector models may require more sophisticated supervision strategies to achieve comparable performance."
+    "latency_s": 12.03,
+    "total_tokens": 2986,
+    "short_answer": "Late-interaction retrievers like ColBERT differ from single-vector dual encoders like DPR by using contextualized late interaction over BERT, where each query and document is encoded into a bag of embeddings, and relevance is modeled through token-level interactions. In contrast, single-vector dual encoders like DPR map both the query and document into a single vector and compute similarity using a dot product. ColBERT's approach allows for more expressive relevance modeling but requires more storage and computational resources."
    },
    {
     "qid": "q10",
@@ -3224,9 +3224,9 @@
     ],
     "gold_cited_recall": 0.3333333333333333,
     "graph_used": false,
-    "latency_s": 7.39,
-    "total_tokens": 2606,
-    "short_answer": "Adaptive-RAG and other approaches decide adaptively whether retrieval is needed for a given query. These methods use query complexity assessment to dynamically choose between retrieval and generation strategies, such as no-retrieval, single-step retrieval, or iterative retrieval. Some approaches, like SelfRAG, use a critic model to decide whether retrieval is necessary, while others, like Adaptive-RAG, implement a controller that upgrades a sequence pipeline into a loop only when complexity demands."
+    "latency_s": 7.41,
+    "total_tokens": 2759,
+    "short_answer": "Adaptive-RAG and other approaches decide adaptively whether retrieval is needed for a given query. These methods use query complexity assessment, confidence estimation, and budget-aware controllers to dynamically determine if retrieval is necessary."
    },
    {
     "qid": "q11",
@@ -3235,23 +3235,41 @@
     "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 5,
+    "n_claims": 2,
     "unsupported_citation": 0,
     "judge_labels": [
-     "partial",
+     "supported",
+     "partial"
+    ],
+    "gold_cited_recall": 0.3333333333333333,
+    "graph_used": false,
+    "latency_s": 6.86,
+    "total_tokens": 3033,
+    "short_answer": "The method IRCoT interleaves retrieval with chain-of-thought reasoning for multi-hop questions such as HotpotQA and MuSiQue. This approach iteratively alternates between retrieving and reasoning steps to build a reasoning chain."
+   },
+   {
+    "qid": "q12",
+    "type": "multihop",
+    "expected_answerable": true,
+    "model_answerable": true,
+    "error": null,
+    "citation_validity": 1.0,
+    "n_claims": 4,
+    "unsupported_citation": 0,
+    "judge_labels": [
      "supported",
      "supported",
      "supported",
      "supported"
     ],
-    "gold_cited_recall": 0.6666666666666666,
+    "gold_cited_recall": 0.5,
     "graph_used": false,
-    "latency_s": 9.23,
-    "total_tokens": 3153,
-    "short_answer": "The method that interleaves retrieval with reasoning steps for multi-hop questions such as HotpotQA or MuSiQue is IRCoT (Interleaving Retrieval with Chain-of-Thought Reasoning)."
+    "latency_s": 8.43,
+    "total_tokens": 3033,
+    "short_answer": "HippoRAG 2 builds on the original HippoRAG by incorporating more comprehensive integration of passages, queries, and triples, which allows it to perform better across sense-making and factual memory tasks. It also introduces improvements in the online retrieval process, such as selecting phrase nodes from filtered triples and assigning reset probabilities based on ranking scores."
    },
    {
-    "qid": "q12",
+    "qid": "q13",
     "type": "multihop",
     "expected_answerable": true,
     "model_answerable": true,
@@ -3266,30 +3284,9 @@
     ],
     "gold_cited_recall": 0.5,
     "graph_used": false,
-    "latency_s": 6.27,
-    "total_tokens": 2894,
-    "short_answer": "HippoRAG 2 builds on the original HippoRAG by incorporating a more comprehensive integration of passages, queries, and triples, which allows it to perform better across sense-making and factual memory tasks. It is closely inspired by HippoRAG and introduces less LLM-generated noise, improving performance in single and multi-hop QA tasks."
-   },
-   {
-    "qid": "q13",
-    "type": "multihop",
-    "expected_answerable": true,
-    "model_answerable": true,
-    "error": null,
-    "citation_validity": 1.0,
-    "n_claims": 4,
-    "unsupported_citation": 0,
-    "judge_labels": [
-     "supported",
-     "supported",
-     "supported",
-     "supported"
-    ],
-    "gold_cited_recall": 0.5,
-    "graph_used": false,
-    "latency_s": 8.7,
-    "total_tokens": 2476,
-    "short_answer": "LightRAG changes compared with the earlier GraphRAG approach by introducing a dual-level retrieval mechanism that integrates low-level retrieval of specific entities with high-level retrieval of broader topics. This mechanism enhances response diversity and improves the handling of complex queries by capturing both detailed and abstract information. Additionally, LightRAG leverages graph-based text indexing to consistently capture the full context in response to queries, which contributes to its superior performance in larger datasets with complex language contexts."
+    "latency_s": 5.96,
+    "total_tokens": 2573,
+    "short_answer": "LightRAG changes compared with the earlier GraphRAG approach by introducing a dual-level retrieval paradigm that integrates low-level retrieval of specific entities with high-level retrieval of broader topics, enhancing response diversity and comprehensive information understanding."
    },
    {
     "qid": "q14",
@@ -3298,40 +3295,39 @@
     "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 6,
+    "n_claims": 5,
     "unsupported_citation": 0,
     "judge_labels": [
      "supported",
      "supported",
      "supported",
      "supported",
-     "supported",
-     "partial"
+     "supported"
     ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 7.75,
-    "total_tokens": 2171,
+    "latency_s": 1640.8,
+    "total_tokens": 2293,
     "short_answer": "The benchmark that evaluates RAG on multi-hop queries built from news articles is MultiHop-RAG. This dataset is specifically designed for evaluating retrieval-augmented generation on complex multi-hop queries and includes 2,556 questions over a corpus of English news articles."
    },
    {
     "qid": "q15",
     "type": "unanswerable",
     "expected_answerable": false,
-    "model_answerable": true,
+    "model_answerable": false,
     "error": null,
     "citation_validity": 1.0,
     "n_claims": 2,
     "unsupported_citation": 0,
     "judge_labels": [
      "supported",
-     "supported"
+     "not_supported"
     ],
     "gold_cited_recall": null,
     "graph_used": false,
-    "latency_s": 6.65,
-    "total_tokens": 2011,
-    "short_answer": "The best RAG method for medical diagnosis in hospitals is the Best Performance Practice, which includes incorporating a query classification module, using the 'Hybrid with HyDE' method for retrieval, employing monoT5 for reranking, opting for Reverse for repacking, and leveraging Recomp for summarization. This configuration yielded the highest average score of 0.483, albeit with a computationally-intensive process."
+    "latency_s": 6.53,
+    "total_tokens": 2132,
+    "short_answer": "The best RAG method for medical diagnosis in hospitals is not explicitly stated in the evidence, but E2 suggests that the Best Performance Practice, which includes using the 'Hybrid with HyDE' method for retrieval, monoT5 for reranking, and Recomp for summarization, yields the highest average score of 0.483. E3 highlights that current RAG methods struggle with integrating knowledge across passages, which is crucial for medical diagnosis."
    },
    {
     "qid": "q16",
@@ -3339,14 +3335,20 @@
     "expected_answerable": false,
     "model_answerable": false,
     "error": null,
-    "citation_validity": null,
-    "n_claims": 0,
+    "citation_validity": 1.0,
+    "n_claims": 5,
     "unsupported_citation": 0,
-    "judge_labels": [],
+    "judge_labels": [
+     "partial",
+     "supported",
+     "supported",
+     "supported",
+     "supported"
+    ],
     "gold_cited_recall": null,
     "graph_used": false,
-    "latency_s": 3.15,
-    "total_tokens": 2975,
+    "latency_s": 11.34,
+    "total_tokens": 2934,
     "short_answer": "The evidence passages do not provide information about the accuracy of Self-RAG on HotpotQA when GPT-5 is the generator."
    },
    {
@@ -3356,19 +3358,16 @@
     "model_answerable": false,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 4,
+    "n_claims": 1,
     "unsupported_citation": 0,
     "judge_labels": [
-     "supported",
-     "partial",
-     "supported",
      "supported"
     ],
     "gold_cited_recall": null,
     "graph_used": false,
-    "latency_s": 4.46,
-    "total_tokens": 2062,
-    "short_answer": "The provided evidence passages do not directly address how much retrieval-augmented generation reduces electricity costs in data centres."
+    "latency_s": 3.31,
+    "total_tokens": 2178,
+    "short_answer": "The evidence does not provide specific data on how much retrieval-augmented generation reduces electricity costs in data centres."
    },
    {
     "qid": "q18",
@@ -3387,12 +3386,31 @@
     ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 7.46,
-    "total_tokens": 2717,
+    "latency_s": 7.79,
+    "total_tokens": 2893,
     "short_answer": "DRAGIN decides when to retrieve based on the LLM's real-time information needs through RIND, which considers the LLM's uncertainty, token influence, and semantic significance. It determines what to retrieve using QFS, which leverages self-attention across the entire context."
    },
    {
     "qid": "q19",
+    "type": "single_paper",
+    "expected_answerable": true,
+    "model_answerable": true,
+    "error": null,
+    "citation_validity": 1.0,
+    "n_claims": 2,
+    "unsupported_citation": 0,
+    "judge_labels": [
+     "supported",
+     "supported"
+    ],
+    "gold_cited_recall": 1.0,
+    "graph_used": false,
+    "latency_s": 6.18,
+    "total_tokens": 1641,
+    "short_answer": "RAFT trains a model to ignore distractor documents in domain-specific RAG by incorporating both relevant and irrelevant documents during training. The model is trained to cite verbatim the right sequence from the relevant document to help answer the question, which helps improve its ability to reason. Additionally, RAFT integrates golden documents with a mix of irrelevant ones to refine the balance between relevant and irrelevant information, strengthening the model's efficiency in identifying and utilizing pertinent content."
+   },
+   {
+    "qid": "q20",
     "type": "single_paper",
     "expected_answerable": true,
     "model_answerable": true,
@@ -3403,34 +3421,13 @@
     "judge_labels": [
      "supported",
      "supported",
-     "supported"
-    ],
-    "gold_cited_recall": 1.0,
-    "graph_used": false,
-    "latency_s": 5.44,
-    "total_tokens": 1480,
-    "short_answer": "RAFT trains a model to ignore distractor documents in domain-specific RAG by incorporating both relevant and irrelevant documents during training. This approach helps the model learn to distinguish between helpful and unhelpful information. The training process involves generating answers based on relevant documents while explicitly considering distractor documents."
-   },
-   {
-    "qid": "q20",
-    "type": "single_paper",
-    "expected_answerable": true,
-    "model_answerable": true,
-    "error": null,
-    "citation_validity": 1.0,
-    "n_claims": 4,
-    "unsupported_citation": 0,
-    "judge_labels": [
-     "supported",
-     "supported",
-     "supported",
      "not_supported"
     ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 6.48,
-    "total_tokens": 2764,
-    "short_answer": "The ALCE benchmark measures three dimensions of LLMs generating text with citations: fluency, correctness, and citation quality. It evaluates long-text generation and allows citing multiple passages for individual statements. The benchmark includes datasets like ASQA, QAMPARI, and ELI5, and combines automatic metrics with human evaluation to ensure robust assessment."
+    "latency_s": 5.83,
+    "total_tokens": 2873,
+    "short_answer": "The ALCE benchmark measures the fluency, correctness, and citation quality of LLMs generating text with citations. It evaluates long-text generation and allows citing multiple passages for individual statements."
    },
    {
     "qid": "q21",
@@ -3448,9 +3445,9 @@
     ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 5.61,
-    "total_tokens": 2454,
-    "short_answer": "The Rewrite-Retrieve-Read framework rewrites queries by prompting an LLM to generate a query for required knowledge based on the original input. This process involves using a few-shot prompt to encourage the LLM to think and produce one or more queries for search."
+    "latency_s": 6.37,
+    "total_tokens": 2638,
+    "short_answer": "The Rewrite-Retrieve-Read framework rewrites queries by prompting an LLM to generate a query that is more aligned with the needed knowledge for retrieval. This process involves using a few-shot prompt to encourage the LLM to think and produce one or more queries for search."
    },
    {
     "qid": "q22",
@@ -3459,23 +3456,18 @@
     "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 8,
+    "n_claims": 3,
     "unsupported_citation": 0,
     "judge_labels": [
-     "supported",
-     "supported",
-     "supported",
-     "supported",
-     "supported",
      "supported",
      "supported",
      "supported"
     ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 9.98,
-    "total_tokens": 2161,
-    "short_answer": "The best-practices study recommended two distinct combinations of RAG components. For maximum performance, it suggested using a query classification module, the 'Hybrid with HyDE' method for retrieval, monoT5 for reranking, Reverse for repacking, and Recomp for summarization. For a balance between efficiency and efficacy, it recommended the query classification module, the Hybrid method for retrieval, TILDEv2 for reranking, Reverse for repacking, and Recomp for summarization."
+    "latency_s": 7.49,
+    "total_tokens": 2187,
+    "short_answer": "The best-practices study recommended two combinations of RAG components: one for maximizing performance and another for balancing efficiency and efficacy. The high-performance configuration includes a query classification module, Hybrid with HyDE for retrieval, monoT5 for reranking, Reverse for repacking, and Recomp for summarization. The balanced efficiency configuration includes a query classification module, Hybrid for retrieval, TILDEv2 for reranking, Reverse for repacking, and Recomp for summarization."
    },
    {
     "qid": "q23",
@@ -3484,9 +3476,11 @@
     "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 4,
+    "n_claims": 6,
     "unsupported_citation": 0,
     "judge_labels": [
+     "partial",
+     "supported",
      "supported",
      "supported",
      "supported",
@@ -3494,8 +3488,8 @@
     ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 6.97,
-    "total_tokens": 1468,
+    "latency_s": 9.08,
+    "total_tokens": 1690,
     "short_answer": "Retrieval-augmented models can be made robust to irrelevant retrieved context by using self-consistency to identify high-quality training examples, employing small NLI models to detect irrelevant context, and training LLMs to determine when to use retrieval. These methods improve robustness and performance, especially in multi-hop tasks."
    },
    {
@@ -3505,19 +3499,18 @@
     "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 4,
+    "n_claims": 3,
     "unsupported_citation": 0,
     "judge_labels": [
-     "supported",
      "supported",
      "supported",
      "not_supported"
     ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 6.68,
-    "total_tokens": 2436,
-    "short_answer": "Mix-of-Granularity (MoG) dynamically selects the chunk size based on the granularity levels and the user's query. It uses a router module to determine the optimal granularity level for retrieving relevant information, adjusting the chunk size according to the specific scenario."
+    "latency_s": 6.89,
+    "total_tokens": 2573,
+    "short_answer": "Mix-of-Granularity (MoG) dynamically selects the chunk size used for retrieval by employing a router module that chooses the best granularity levels based on the user's query. This approach allows for fine-grained chunking for specific questions and coarse-grained chunking for broader questions, ensuring both pertinence and coverage."
    },
    {
     "qid": "q25",
@@ -3531,14 +3524,14 @@
     "judge_labels": [
      "supported",
      "partial",
-     "not_supported",
+     "supported",
      "supported"
     ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 7.72,
-    "total_tokens": 2564,
-    "short_answer": "Search-R1 and ZeroSearch differ in their training approaches for LLMs to use search with reinforcement learning. Search-R1 involves training LLMs to interact with search engines in an interleaved manner with their own reasoning, using a reward function based on outcomes. ZeroSearch, on the other hand, trains LLMs to simulate search capabilities without actual search, using reinforcement learning algorithms like REINFORCE, GRPO, and PPO."
+    "latency_s": 9.77,
+    "total_tokens": 2365,
+    "short_answer": "Search-R1 and ZeroSearch differ in their training approaches for LLMs to use search with reinforcement learning. Search-R1 uses a structured template with iterative reasoning, search engine calling, and answer generation, while ZeroSearch simulates search without real-time API usage and employs multiple reinforcement learning algorithms. Additionally, ZeroSearch focuses on curriculum rollout and lightweight fine-tuning, whereas Search-R1 emphasizes structured output formats and avoids content-specific biases."
    },
    {
     "qid": "q26",
@@ -3547,44 +3540,22 @@
     "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 3,
+    "n_claims": 4,
     "unsupported_citation": 0,
     "judge_labels": [
-     "partial",
+     "supported",
+     "supported",
      "supported",
      "supported"
     ],
-    "gold_cited_recall": 0.5,
+    "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 12.19,
-    "total_tokens": 2510,
-    "short_answer": "RQ-RAG and Rewrite-Retrieve-Read both aim to improve retrieval-augmented generation (RAG) by refining queries, but they differ in their approaches. RQ-RAG trains the LLM itself to refine queries through rewriting, decomposition, and disambiguation, while Rewrite-Retrieve-Read uses a small model to rewrite queries for a black-box reader. On multi-hop datasets, Rewrite-Retrieve-Read outperforms BGM, but RQ-RAG surpasses both baselines and achieves better results in both single-hop and multi-hop tasks."
+    "latency_s": 11.99,
+    "total_tokens": 2664,
+    "short_answer": "RQ-RAG and Rewrite-Retrieve-Read are both query refinement approaches for retrieval-augmented generation. RQ-RAG focuses on training the LLM to refine queries through rewriting, decomposition, and disambiguation, while Rewrite-Retrieve-Read introduces a query rewriting step with a small, trainable model to adapt the input for a frozen retriever and reader. Both approaches aim to enhance retrieval-augmented LLM performance, but RQ-RAG integrates query refinement directly into the LLM training process, whereas Rewrite-Retrieve-Read uses a separate rewriter."
    },
    {
     "qid": "q27",
-    "type": "comparison",
-    "expected_answerable": true,
-    "model_answerable": true,
-    "error": null,
-    "citation_validity": 1.0,
-    "n_claims": 6,
-    "unsupported_citation": 0,
-    "judge_labels": [
-     "supported",
-     "supported",
-     "supported",
-     "supported",
-     "not_supported",
-     "supported"
-    ],
-    "gold_cited_recall": 0.3333333333333333,
-    "graph_used": false,
-    "latency_s": 8.67,
-    "total_tokens": 2615,
-    "short_answer": "RAPTOR organizes the corpus into a hierarchical tree structure based on semantic similarity, while GraphRAG uses a knowledge graph (KG) to generate summaries of concepts. HippoRAG also uses a KG but integrates knowledge through personalized PageRank (PPR) rather than summarization. Additionally, GraphRAG's implementation includes a local search function for fine-grained queries."
-   },
-   {
-    "qid": "q28",
     "type": "comparison",
     "expected_answerable": true,
     "model_answerable": true,
@@ -3599,11 +3570,35 @@
      "supported",
      "supported"
     ],
+    "gold_cited_recall": 0.6666666666666666,
+    "graph_used": false,
+    "latency_s": 9.39,
+    "total_tokens": 2771,
+    "short_answer": "RAPTOR organizes the corpus into a recursive tree structure based on semantic similarity, while GraphRAG uses hierarchical community detection to create multi-level summaries of graph communities. HippoRAG employs a knowledge graph (KG) and uses personalized PageRank (PPR) to retrieve relevant information."
+   },
+   {
+    "qid": "q28",
+    "type": "comparison",
+    "expected_answerable": true,
+    "model_answerable": true,
+    "error": null,
+    "citation_validity": 1.0,
+    "n_claims": 7,
+    "unsupported_citation": 0,
+    "judge_labels": [
+     "supported",
+     "supported",
+     "supported",
+     "supported",
+     "supported",
+     "supported",
+     "supported"
+    ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 7.31,
-    "total_tokens": 2276,
-    "short_answer": "REPLUG trains the retriever to improve the performance of a frozen language model, while RA-DIT fine-tunes both the retriever and the language model. RA-DIT also shows better performance than REPLUG."
+    "latency_s": 13.96,
+    "total_tokens": 2653,
+    "short_answer": "REPLUG and RA-DIT differ in their approach to training the retriever and the language model. REPLUG treats the language model as a black box and only trains the retriever, while RA-DIT fine-tunes both the retriever and the language model."
    },
    {
     "qid": "q29",
@@ -3612,18 +3607,17 @@
     "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 3,
+    "n_claims": 2,
     "unsupported_citation": 0,
     "judge_labels": [
      "supported",
-     "partial",
-     "supported"
+     "partial"
     ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 8.36,
-    "total_tokens": 2151,
-    "short_answer": "Multi-hop dense retrieval and interleaving retrieval with chain-of-thought (CoT) differ in their approach to handling multi-hop questions. Multi-hop dense retrieval, as described in E1 and E3, involves an iterative process where each retrieval step is based on the previous results and the question, using a query reformulation strategy. In contrast, interleaving retrieval with CoT, as described in E2 and E4, involves a retrieve-and-read paradigm where retrieval is guided by CoT reasoning, and the retrieval and reasoning steps are interleaved to inform each other. E5 provides results showing the effectiveness of interleaving retrieval with CoT in improving QA performance."
+    "latency_s": 9.51,
+    "total_tokens": 2291,
+    "short_answer": "Multi-hop dense retrieval and interleaving retrieval with chain-of-thought (CoT) differ in their approach to handling multi-hop questions. Multi-hop dense retrieval, as described in E1 and E3, involves an iterative process where each retrieval step is based on the previous results and the question, using a query reformulation strategy. In contrast, interleaving retrieval with CoT, as described in E2 and E4, involves a retrieve-and-read paradigm where retrieval is guided by CoT reasoning, and the retrieval and reasoning steps are interleaved to inform each other."
    },
    {
     "qid": "q30",
@@ -3637,15 +3631,15 @@
     "judge_labels": [
      "supported",
      "supported",
-     "not_supported",
+     "supported",
      "supported",
      "supported"
     ],
     "gold_cited_recall": 0.25,
     "graph_used": false,
-    "latency_s": 8.47,
-    "total_tokens": 2883,
-    "short_answer": "Later methods that extend Self-RAG's idea of adaptive retrieval include Adaptive-RAG, Flare, and CoRAG. These methods change the approach by incorporating more sophisticated mechanisms for determining when and what to retrieve, such as using question complexity, confidence monitoring, and multi-step reasoning."
+    "latency_s": 12.47,
+    "total_tokens": 3154,
+    "short_answer": "Later methods that extend Self-RAG's idea of adaptive retrieval include Adaptive-RAG, CtrlA, and Flare. These methods change the approach by incorporating more sophisticated mechanisms for determining when and what to retrieve, such as using question complexity, explicit query formulation, and multi-step reasoning."
    },
    {
     "qid": "q31",
@@ -3654,23 +3648,18 @@
     "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 8,
+    "n_claims": 3,
     "unsupported_citation": 0,
     "judge_labels": [
-     "supported",
-     "supported",
-     "supported",
-     "supported",
-     "partial",
      "supported",
      "supported",
      "supported"
     ],
     "gold_cited_recall": 0.6666666666666666,
     "graph_used": false,
-    "latency_s": 14.21,
-    "total_tokens": 2937,
-    "short_answer": "Dense retrieval evolved from DPR to later methods like ANCE and RocketQA through improvements in training approaches. DPR used BERTbase, while ANCE used RoBERTabase and introduced dynamic negative sampling. RocketQA further enhanced training by incorporating cross-batch negatives and other strategies, leading to better performance compared to previous methods."
+    "latency_s": 9.68,
+    "total_tokens": 2643,
+    "short_answer": "Dense retrieval evolved from DPR to later methods like ANCE and RocketQA through improvements in training strategies. DPR was a foundational model, while ANCE introduced global negative sampling to improve learning efficiency. RocketQA further optimized training by incorporating cross-batch negatives, denoised hard negatives, and data augmentation, leading to better performance."
    },
    {
     "qid": "q32",
@@ -3679,23 +3668,22 @@
     "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 2,
+    "n_claims": 1,
     "unsupported_citation": 0,
     "judge_labels": [
-     "supported",
      "supported"
     ],
     "gold_cited_recall": 0.0,
     "graph_used": false,
-    "latency_s": 4.63,
-    "total_tokens": 2070,
-    "short_answer": "Community-based GraphRAG builds on GraphRAG's community summaries by organizing the constructed knowledge graph into hierarchical communities using graph clustering algorithms. Each community is associated with a textual summary/report, where lower-level communities capture fine-grained information and higher-level communities provide increasingly abstract representations."
+    "latency_s": 3.55,
+    "total_tokens": 2156,
+    "short_answer": "Community-based GraphRAG builds on GraphRAG's community summaries by organizing the constructed knowledge graph into hierarchical communities using graph clustering algorithms, with each community associated with a textual summary/report."
    },
    {
     "qid": "q33",
     "type": "multihop",
     "expected_answerable": true,
-    "model_answerable": true,
+    "model_answerable": false,
     "error": null,
     "citation_validity": 1.0,
     "n_claims": 4,
@@ -3708,9 +3696,9 @@
     ],
     "gold_cited_recall": 0.6666666666666666,
     "graph_used": false,
-    "latency_s": 7.9,
-    "total_tokens": 2370,
-    "short_answer": "Open-domain QA evolved from DrQA's retriever-reader pipeline to learned retrievers like ORQA and REALM by introducing end-to-end learning and pre-training techniques. ORQA and REALM use an Inverse Cloze Task to initialize retrievers and jointly train retrievers and readers, moving away from fixed indexes and improving performance through backpropagation into retrieval components."
+    "latency_s": 10.9,
+    "total_tokens": 2573,
+    "short_answer": "Open-domain QA evolved from DrQA's retriever-reader pipeline to learned retrievers like ORQA and REALM by integrating end-to-end learning and pre-training techniques. ORQA introduced joint learning of retrievers and readers using the Inverse Cloze Task, while REALM enhanced language model pre-training with retrieval-augmented approaches. These methods improved performance on open-domain QA benchmarks."
    },
    {
     "qid": "q34",
@@ -3732,9 +3720,9 @@
     ],
     "gold_cited_recall": 0.3333333333333333,
     "graph_used": false,
-    "latency_s": 11.99,
-    "total_tokens": 2766,
-    "short_answer": "Long-context LLMs do not make retrieval-augmented generation (RAG) unnecessary. While long-context LLMs can outperform RAG in certain scenarios, RAG remains relevant due to its cost-efficiency and ability to handle specific challenges like precision and resource efficiency. The study suggests that combining RAG with long-context LLMs can offer the best of both approaches."
+    "latency_s": 13.67,
+    "total_tokens": 2932,
+    "short_answer": "Long-context LLMs do not make retrieval-augmented generation (RAG) unnecessary. While long-context LLMs can outperform RAG in certain scenarios, RAG remains relevant due to its cost-efficiency and ability to handle specific challenges like precision and resource constraints. Hybrid approaches that combine both methods are also proposed to leverage their strengths."
    },
    {
     "qid": "q35",
@@ -3753,9 +3741,9 @@
     ],
     "gold_cited_recall": 0.3333333333333333,
     "graph_used": false,
-    "latency_s": 8.86,
-    "total_tokens": 2553,
-    "short_answer": "Graph-based RAG systems do not consistently outperform standard vector RAG across all tasks and datasets. While they show superior performance in large-scale corpora and specific QA tasks, they fail to consistently outperform baselines on every question. Some studies indicate that graph-based methods can be outperformed by standard RAG in certain scenarios."
+    "latency_s": 11.25,
+    "total_tokens": 2748,
+    "short_answer": "Graph-based RAG systems do not consistently outperform standard vector RAG across all tasks and datasets. While they show superior performance in large-scale corpora and specific QA tasks, they fail to consistently outperform baselines in other scenarios."
    },
    {
     "qid": "q36",
@@ -3764,9 +3752,10 @@
     "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 4,
+    "n_claims": 5,
     "unsupported_citation": 0,
     "judge_labels": [
+     "supported",
      "supported",
      "supported",
      "supported",
@@ -3774,31 +3763,12 @@
     ],
     "gold_cited_recall": 0.0,
     "graph_used": false,
-    "latency_s": 6.71,
-    "total_tokens": 2269,
-    "short_answer": "Adding more retrieved passages does not always improve answer quality. For ChatGPT, more passages in context do not yield substantial improvement, while GPT-4 shows an increasing trend with more passages. Incorporating longer retrieved documents does not consistently improve performance and tends to increase latency. However, a larger pool of passage candidates can help improve performance, though gains tend to plateau."
+    "latency_s": 11.58,
+    "total_tokens": 2582,
+    "short_answer": "Adding more retrieved passages does not always improve answer quality. For ChatGPT, more passages in context do not yield substantial improvement, while GPT-4 shows an increasing trend with more passages, but the improvement is not proportional to retrieval performance. Incorporating longer retrieved documents does not consistently improve performance and tends to increase latency."
    },
    {
     "qid": "q37",
-    "type": "metadata",
-    "expected_answerable": true,
-    "model_answerable": true,
-    "error": null,
-    "citation_validity": 1.0,
-    "n_claims": 2,
-    "unsupported_citation": 0,
-    "judge_labels": [
-     "supported",
-     "supported"
-    ],
-    "gold_cited_recall": 0.0,
-    "graph_used": false,
-    "latency_s": 6.47,
-    "total_tokens": 2058,
-    "short_answer": "The survey titled 'Retrieval-Augmented Generation: A Comprehensive Survey of Architectures, Enhancements, and Robustness Frontiers' (2025, arXiv:2506.00054) covers methods for evaluating retrieval-augmented generation systems. It includes a table summarizing recent benchmarks developed to assess key aspects of RAG systems, such as robustness, multi-hop reasoning, medical-domain adaptation, and federated retrieval."
-   },
-   {
-    "qid": "q38",
     "type": "metadata",
     "expected_answerable": true,
     "model_answerable": true,
@@ -3809,10 +3779,32 @@
     "judge_labels": [
      "supported"
     ],
+    "gold_cited_recall": 0.0,
+    "graph_used": false,
+    "latency_s": 3.92,
+    "total_tokens": 2132,
+    "short_answer": "The survey titled 'Retrieval-Augmented Generation: A Comprehensive Survey of Architectures, Enhancements, and Robustness Frontiers' covers methods for evaluating retrieval-augmented generation systems."
+   },
+   {
+    "qid": "q38",
+    "type": "metadata",
+    "expected_answerable": true,
+    "model_answerable": true,
+    "error": null,
+    "citation_validity": 1.0,
+    "n_claims": 5,
+    "unsupported_citation": 0,
+    "judge_labels": [
+     "supported",
+     "supported",
+     "supported",
+     "supported",
+     "supported"
+    ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 2.88,
-    "total_tokens": 1001,
+    "latency_s": 7.05,
+    "total_tokens": 1286,
     "short_answer": "The paper 'Modular RAG: Transforming RAG Systems into LEGO-like Reconfigurable Frameworks' proposes a modular, LEGO-like framework for reconfigurable RAG systems."
    },
    {
@@ -3831,32 +3823,29 @@
     ],
     "gold_cited_recall": 1.0,
     "graph_used": false,
-    "latency_s": 7.04,
-    "total_tokens": 2427,
-    "short_answer": "The first BERT-based passage re-ranker, described in Passage Re-ranking with BERT (2019), was adapted to work on MS MARCO by re-purposing BERT as a passage re-ranker. It achieved state-of-the-art results on the MS MARCO passage re-ranking task. The training set for MS MARCO contains approximately 400M tuples of a query, relevant and non-relevant passages, and the development set contains approximately 6,900 queries, each paired with the top 1,000 passages retrieved with BM25."
+    "latency_s": 8.18,
+    "total_tokens": 2570,
+    "short_answer": "The first BERT-based passage re-ranker, described in Passage Re-ranking with BERT (2019), was adapted to work on the MS MARCO dataset by re-purposing BERT as a passage re-ranker. It achieved state-of-the-art results on the MS MARCO passage re-ranking task. The training set for MS MARCO contains approximately 400M tuples of a query, relevant and non-relevant passages, and the development set contains approximately 6,900 queries, each paired with the top 1,000 passages retrieved with BM25."
    },
    {
     "qid": "q40",
     "type": "unanswerable",
     "expected_answerable": false,
-    "model_answerable": false,
+    "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 6,
+    "n_claims": 3,
     "unsupported_citation": 0,
     "judge_labels": [
      "supported",
      "supported",
-     "supported",
-     "supported",
-     "not_supported",
      "supported"
     ],
     "gold_cited_recall": null,
     "graph_used": false,
-    "latency_s": 11.19,
-    "total_tokens": 3103,
-    "short_answer": "The evidence does not directly state which RAG method has the lowest carbon footprint per query. It discusses the carbon footprint in general but does not compare specific methods."
+    "latency_s": 10.17,
+    "total_tokens": 3157,
+    "short_answer": "The passage does not directly state which RAG method has the lowest carbon footprint per query. However, it mentions that Parametric RAG has long-term savings in terms of power and carbon footprints, and that SPECULATIVE RAG reduces processing time while maintaining high performance. Community-GraphRAG achieves the lowest retrieval latency, which may indirectly relate to carbon footprint."
    },
    {
     "qid": "q41",
@@ -3865,16 +3854,18 @@
     "model_answerable": true,
     "error": null,
     "citation_validity": 1.0,
-    "n_claims": 1,
+    "n_claims": 3,
     "unsupported_citation": 0,
     "judge_labels": [
+     "supported",
+     "partial",
      "supported"
     ],
     "gold_cited_recall": null,
     "graph_used": false,
-    "latency_s": 2.76,
-    "total_tokens": 2287,
-    "short_answer": "OpenAI uses dynamic retrieval calls via system prompts for ChatGPT's browsing feature, as described in the passage."
+    "latency_s": 7.36,
+    "total_tokens": 2767,
+    "short_answer": "OpenAI uses a generic retrieval plug-in inside ChatGPT's browsing feature, which retrieves the most relevant document from users' data sources and tailors ChatGPT's response to meet their specific needs."
    },
    {
     "qid": "q42",
@@ -3886,20 +3877,20 @@
     "n_claims": 6,
     "unsupported_citation": 0,
     "judge_labels": [
+     "partial",
      "supported",
      "supported",
-     "not_supported",
      "supported",
-     "not_supported",
+     "supported",
      "supported"
     ],
     "gold_cited_recall": null,
     "graph_used": false,
-    "latency_s": 9.82,
-    "total_tokens": 2918,
+    "latency_s": 13.18,
+    "total_tokens": 3552,
     "short_answer": "The exact recall@10 of RAPTOR on the Natural Questions test set with a 70B reader is not directly provided in the given evidence passages."
    }
   ]
  },
- "answers_run_at": "2026-11-19 18:20"
+ "answers_run_at": "2026-11-19 19:30"
 }

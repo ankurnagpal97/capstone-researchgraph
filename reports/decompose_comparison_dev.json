@@ -1,0 +1,137 @@
+{
+ "set": "comparison_dev.jsonl",
+ "types": "",
+ "mode": "rerank",
+ "summary": {
+  "plain": {
+   "mean_coverage": 0.792,
+   "all_gold_in_pack": "7/12"
+  },
+  "decomposed": {
+   "mean_coverage": 0.958,
+   "all_gold_in_pack": "11/12"
+  }
+ },
+ "rows": [
+  {
+   "qid": "cd01",
+   "question": "How do REALM and RETRO differ in when and how retrieval is used?",
+   "plain": 1.0,
+   "decomposed": 1.0,
+   "entities": [
+    "REALM",
+    "RETRO"
+   ]
+  },
+  {
+   "qid": "cd02",
+   "question": "Compare HyDE and Query2doc as ways to expand queries with an LLM.",
+   "plain": 0.5,
+   "decomposed": 1.0,
+   "entities": [
+    "HyDE",
+    "Query2doc"
+   ]
+  },
+  {
+   "qid": "cd03",
+   "question": "How do Contriever and DPR differ in how the retriever is trained?",
+   "plain": 0.5,
+   "decomposed": 0.5,
+   "entities": [
+    "Contriever",
+    "DPR"
+   ]
+  },
+  {
+   "qid": "cd04",
+   "question": "What did ColBERTv2 change compared with the original ColBERT?",
+   "plain": 1.0,
+   "decomposed": 1.0,
+   "entities": [
+    "ColBERTv2",
+    "ColBERT"
+   ]
+  },
+  {
+   "qid": "cd05",
+   "question": "How do Self-RAG and CRAG differ in how they handle low-quality retrieved documents?",
+   "plain": 0.5,
+   "decomposed": 1.0,
+   "entities": [
+    "Self-RAG",
+    "CRAG"
+   ]
+  },
+  {
+   "qid": "cd06",
+   "question": "How do Atlas and REPLUG differ in whether the language model is trained?",
+   "plain": 1.0,
+   "decomposed": 1.0,
+   "entities": [
+    "Atlas",
+    "REPLUG"
+   ]
+  },
+  {
+   "qid": "cd07",
+   "question": "How do RAGChecker and RAGAS differ in what they measure?",
+   "plain": 1.0,
+   "decomposed": 1.0,
+   "entities": [
+    "RAGChecker",
+    "RAGAS"
+   ]
+  },
+  {
+   "qid": "cd08",
+   "question": "Compare LongRAG and RAPTOR in how they use long retrieval units or summaries.",
+   "plain": 1.0,
+   "decomposed": 1.0,
+   "entities": [
+    "LongRAG",
+    "RAPTOR"
+   ]
+  },
+  {
+   "qid": "cd09",
+   "question": "How does DRAGIN's retrieval trigger differ from FLARE's?",
+   "plain": 0.5,
+   "decomposed": 1.0,
+   "entities": [
+    "DRAGIN",
+    "FLARE"
+   ]
+  },
+  {
+   "qid": "cd10",
+   "question": "How do RankRAG and RECOMP use the LLM to rank or compress retrieved context?",
+   "plain": 1.0,
+   "decomposed": 1.0,
+   "entities": [
+    "RankRAG",
+    "RECOMP"
+   ]
+  },
+  {
+   "qid": "cd11",
+   "question": "How does MiniRAG differ from LightRAG?",
+   "plain": 1.0,
+   "decomposed": 1.0,
+   "entities": [
+    "MiniRAG",
+    "LightRAG"
+   ]
+  },
+  {
+   "qid": "cd12",
+   "question": "Compare Speculative RAG and Chain-of-Note in how they draft or note-take over retrieved documents.",
+   "plain": 0.5,
+   "decomposed": 1.0,
+   "entities": [
+    "Speculative RAG",
+    "Chain-of-Note"
+   ]
+  }
+ ]
+}

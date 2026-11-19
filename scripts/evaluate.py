@@ -96,6 +96,8 @@ def main():
     ap.add_argument("--answer-set", default="curated")
     ap.add_argument("--answer-mode", default="rerank")
     ap.add_argument("--answers-only", action="store_true", help="keep the saved retrieval results; redo answers only")
+    ap.add_argument("--prompt", default=answer.PROMPT_VERSION)
+    ap.add_argument("--no-decompose", action="store_true", help="answers without per-entity retrieval")
     args = ap.parse_args()
 
     corpus = {r[0] for r in db.connect().execute("SELECT DISTINCT paper_id FROM chunks")}
@@ -157,10 +159,10 @@ def main():
         qs = questions[args.answer_set]
         print(f"\n== Answers: {args.answer_set}, system {args.answer_mode}, {len(qs)} questions")
         recs, audit_rows = [], []
-        prompt_version = answer.PROMPT_VERSION
+        prompt_version = args.prompt
         for q in qs:
-            res = R.search(q["question"], mode=args.answer_mode, k=10)
-            a = answer.ask(q["question"], res)
+            res = (R.search_decomposed if not args.no_decompose else R.search)(q["question"], mode=args.answer_mode, k=10)
+            a = answer.ask(q["question"], res, prompt_version=args.prompt)
             labels = judge(a) if a.get("claims") else []
             cited = {e["paper_id"] for e in a["evidence"] for c in a["claims"] if e["label"] in c["evidence"]}
             gold = set(q["gold_in_corpus"])
@@ -188,7 +190,7 @@ def main():
         all_labels = [l for r in recs for l in r["judge_labels"]]
         lat = sorted(r["latency_s"] for r in recs)
         report["answers"] = {
-            "set": args.answer_set, "system": SYSTEMS[args.answer_mode], "prompt": prompt_version, "n": len(recs),
+            "set": args.answer_set, "system": SYSTEMS[args.answer_mode] + ("" if args.no_decompose else " + per-entity retrieval"), "prompt": prompt_version, "n": len(recs),
             "abstention_on_unanswerable": f"{sum(r['model_answerable'] is False for r in unans)}/{len(unans)}",
             "answered_when_answerable": f"{sum(r['model_answerable'] is True for r in ans_)}/{len(ans_)}",
             "json_failures": sum(1 for r in recs if r["error"]),

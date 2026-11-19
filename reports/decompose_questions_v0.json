@@ -1,0 +1,189 @@
+{
+ "set": "questions_v0.jsonl",
+ "types": "comparison,multihop,disagreement",
+ "mode": "rerank",
+ "summary": {
+  "plain": {
+   "mean_coverage": 0.592,
+   "all_gold_in_pack": "5/19"
+  },
+  "decomposed": {
+   "mean_coverage": 0.689,
+   "all_gold_in_pack": "8/19"
+  }
+ },
+ "rows": [
+  {
+   "qid": "q07",
+   "question": "How do RAGAS and ARES differ in how they evaluate RAG systems?",
+   "plain": 1.0,
+   "decomposed": 1.0,
+   "entities": [
+    "RAGAS",
+    "ARES"
+   ]
+  },
+  {
+   "qid": "q08",
+   "question": "Compare how IRCoT and FLARE decide when to retrieve during generation.",
+   "plain": 0.5,
+   "decomposed": 1.0,
+   "entities": [
+    "IRCoT",
+    "FLARE"
+   ]
+  },
+  {
+   "qid": "q09",
+   "question": "How do late-interaction retrievers like ColBERT differ from single-vector dual encoders like DPR?",
+   "plain": 0.5,
+   "decomposed": 0.5,
+   "entities": [
+    "ColBERT",
+    "DPR"
+   ]
+  },
+  {
+   "qid": "q10",
+   "question": "Which approaches decide adaptively whether retrieval is needed for a given query?",
+   "plain": 0.33,
+   "decomposed": 0.33,
+   "entities": []
+  },
+  {
+   "qid": "q11",
+   "question": "Which methods interleave retrieval with reasoning steps for multi-hop questions such as HotpotQA or MuSiQue?",
+   "plain": 0.67,
+   "decomposed": 0.67,
+   "entities": [
+    "HotpotQA",
+    "MuSiQue"
+   ]
+  },
+  {
+   "qid": "q12",
+   "question": "How does HippoRAG 2 build on the original HippoRAG?",
+   "plain": 1.0,
+   "decomposed": 1.0,
+   "entities": [
+    "HippoRAG 2",
+    "HippoRAG"
+   ]
+  },
+  {
+   "qid": "q13",
+   "question": "What does LightRAG change compared with the earlier GraphRAG approach?",
+   "plain": 0.5,
+   "decomposed": 1.0,
+   "entities": [
+    "LightRAG",
+    "GraphRAG"
+   ]
+  },
+  {
+   "qid": "q25",
+   "question": "How do Search-R1 and ZeroSearch differ in how they train LLMs to use search with reinforcement learning?",
+   "plain": 1.0,
+   "decomposed": 1.0,
+   "entities": [
+    "Search-R1",
+    "ZeroSearch"
+   ]
+  },
+  {
+   "qid": "q26",
+   "question": "Compare RQ-RAG and the Rewrite-Retrieve-Read approach to query refinement.",
+   "plain": 0.5,
+   "decomposed": 1.0,
+   "entities": [
+    "RQ-RAG",
+    "Rewrite-Retrieve-Read"
+   ]
+  },
+  {
+   "qid": "q27",
+   "question": "How do RAPTOR, GraphRAG and HippoRAG organise the corpus differently before retrieval?",
+   "plain": 0.33,
+   "decomposed": 0.67,
+   "entities": [
+    "RAPTOR",
+    "GraphRAG",
+    "HippoRAG"
+   ]
+  },
+  {
+   "qid": "q28",
+   "question": "How do REPLUG and RA-DIT differ in whether they train the retriever, the language model, or both?",
+   "plain": 1.0,
+   "decomposed": 1.0,
+   "entities": [
+    "REPLUG",
+    "RA-DIT"
+   ]
+  },
+  {
+   "qid": "q29",
+   "question": "How does multi-hop dense retrieval differ from interleaving retrieval with chain-of-thought for multi-hop QA?",
+   "plain": 1.0,
+   "decomposed": 1.0,
+   "entities": []
+  },
+  {
+   "qid": "q30",
+   "question": "Which later methods extend Self-RAG's idea of adaptive retrieval, and what do they change?",
+   "plain": 0.25,
+   "decomposed": 0.25,
+   "entities": []
+  },
+  {
+   "qid": "q31",
+   "question": "How did dense retrieval evolve from DPR to later training methods like ANCE and RocketQA?",
+   "plain": 0.67,
+   "decomposed": 0.67,
+   "entities": [
+    "DPR",
+    "ANCE",
+    "RocketQA"
+   ]
+  },
+  {
+   "qid": "q32",
+   "question": "Which graph-based RAG methods build on GraphRAG's community summaries?",
+   "plain": 0.33,
+   "decomposed": 0.33,
+   "entities": []
+  },
+  {
+   "qid": "q33",
+   "question": "How did open-domain QA move from DrQA's retriever-reader pipeline to learned retrievers like ORQA and REALM?",
+   "plain": 0.67,
+   "decomposed": 0.67,
+   "entities": [
+    "DrQA",
+    "ORQA",
+    "REALM"
+   ]
+  },
+  {
+   "qid": "q34",
+   "question": "Do long-context LLMs make retrieval-augmented generation unnecessary?",
+   "plain": 0.33,
+   "decomposed": 0.33,
+   "entities": []
+  },
+  {
+   "qid": "q35",
+   "question": "Does graph-based RAG consistently outperform standard vector RAG?",
+   "plain": 0.67,
+   "decomposed": 0.67,
+   "entities": []
+  },
+  {
+   "qid": "q36",
+   "question": "Does adding more retrieved passages always improve answer quality?",
+   "plain": 0.0,
+   "decomposed": 0.0,
+   "entities": []
+  }
+ ]
+}

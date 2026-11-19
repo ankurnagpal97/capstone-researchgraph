@@ -8,7 +8,7 @@ Standard library only. Handles the service limits from the Track B guide:
   - embeddings take <= 16 texts           -> embed() splits into batches of 16
 Every call is recorded in CALL_LOG (route, status, seconds, tokens) for later analysis.
 """
-import json, os, ssl, threading, time, urllib.error, urllib.request
+import http.client, json, os, ssl, threading, time, urllib.error, urllib.request
 from collections import deque
 
 RETRY_STATUSES = {429, 503}
@@ -109,6 +109,15 @@ class Endpoint:
                     self.sleep(delays.pop(0))
                     continue
                 raise ApiError(e.code, text, route) from None
+            except (urllib.error.URLError, http.client.HTTPException, OSError) as e:
+                # dropped connection, reset, timeout: transient, retry like 429/503.
+                # A certificate failure is a configuration error: never retried.
+                reason = getattr(e, "reason", e)
+                entry.update(status="network", error=f"{type(reason).__name__}: {reason}"[:200])
+                CALL_LOG.append(entry)
+                if isinstance(reason, ssl.SSLCertVerificationError) or not delays:
+                    raise ApiError(0, f"network error: {type(reason).__name__}: {reason}", route) from None
+                self.sleep(delays.pop(0))
 
 
 class Client:

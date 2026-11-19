@@ -46,10 +46,11 @@ flowchart LR
 | Chunking | Paragraphs within one section, about 300 tokens, about 50 tokens of overlap, at most 1,500 characters | The embedding service rejects anything over 512 tokens; sections keep the context needed for citations |
 | Dense retrieval | bge-small-en-v1.5 (provided, 384 dimensions) with its query instruction | Fixed by Track B; vectors cached by text hash |
 | Fusion | Reciprocal rank fusion, k = 60, 50 candidates per ranker, at most 3 chunks per paper | Standard and needs no tuning; the per-paper cap keeps one paper from filling the evidence |
+| Per-entity retrieval | For questions naming 2+ methods, also search for each name, using the paper that introduces it (title or abstract) | Comparisons need evidence for every side; the plain search often found only one |
 | Reranker | `cross-encoder/ms-marco-MiniLM-L-6-v2` on CPU (30 pairs in 0.24 s) | Small enough to run locally; the GPU (MPS) ran out of shared memory during long runs |
 | Citation graph | OpenAlex references plus title and ID matches in reference lists (each edge records its source); used only to nominate papers, whose passages must still win reranking | A citation shows a link, not agreement or evidence |
-| Generation | One call per answer; JSON claim ledger in which every claim cites passage labels; a passage-check field first (prompt v2) | Track B allows 8,192 tokens per request and at most 1,024 output tokens, so there's room for exactly one structured call |
-| Safety rails | Citation audit (labels must exist in the evidence pack), abstention guard (if the answer says "not stated", the question is marked unanswerable), retrieved text treated as untrusted | Verification happens in code, not just in the prompt |
+| Generation | One call per answer; JSON claim ledger in which every claim and comparison cites passage labels; a passage-check field first; survey passages marked as second-hand (prompt v3) | Track B allows 8,192 tokens per request and at most 1,024 output tokens, so there's room for exactly one structured call |
+| Safety rails | Citation audit (labels must exist in the evidence pack); abstention guard (an answer that says "not stated" is marked unanswerable); named-thing check (every name in the question must appear in the evidence); comparability check (different papers are never "directly comparable"); retrieved text treated as untrusted (tested with a prompt injection) | Verification happens in code, not just in the prompt |
 
 ## 3. Evaluation design
 
@@ -81,29 +82,44 @@ Curated n = 36 answerable questions; synthetic test n = 45. Confidence intervals
 
 ### 4.2 Answers
 
-Curated set, 42 questions (36 answerable, 6 unanswerable), one Qwen3-8B call per question. The final configuration (B3 + prompt `answer-v2`) is compared with the first run (B4 + prompt v1). The prompt was changed using a separate 20-question answer-tuning set (`answer_dev.jsonl`; unanswerable questions declined went from 5/8 to 7/8), not the test set.
+Curated set, 42 questions (36 answerable, 6 unanswerable), one Qwen3-8B call per question. Three configurations were each run once on this set. Every change between them was chosen using tuning sets only (`answer_dev.jsonl`, `comparison_dev.jsonl`).
 
-| Measure | First run (B4, v1) | **Final (B3, v2)** |
-|---|---|---|
-| Unanswerable questions correctly declined | 2 / 6 | **4 / 6** |
-| Answerable questions answered | 36 / 36 | 36 / 36 |
-| Invalid JSON replies | 0 | 0 |
-| Cited labels that exist in the evidence pack | 100% | 100% |
-| Claims without a valid citation | 0 / 110 | 0 / 164 |
-| Gold papers among cited passages | 0.66 | **0.70** |
-| Automatic judge: supported / partial / not supported | 95.5% / 3.6% / 0.9% | 89.0% / 5.5% / 5.5% |
-| Latency p50 / p95 | 6.4 s / 10.6 s | 7.0 s / 12.2 s |
-| Mean tokens per answer (input + output) | 2,262 | 2,373 |
+| Measure | Run 1 (B4, prompt v1) | Run 2 (B3, v2) | **Final (B3 + per-entity, v3)** |
+|---|---|---|---|
+| Unanswerable questions correctly declined | 2 / 6 | 4 / 6 | **4 / 6** |
+| Answerable questions answered | 36 / 36 | 36 / 36 | 35 / 36 |
+| Invalid JSON replies | 0 | 0 | 0 |
+| Cited labels that exist in the evidence pack | 100% | 100% | 100% |
+| Claims without a valid citation | 0 / 110 | 0 / 164 | 0 / 154 |
+| Gold papers among cited passages | 0.66 | 0.70 | **0.75** |
+| Automatic judge: supported / partial / not supported | 95.5 / 3.6 / 0.9% | 89.0 / 5.5 / 5.5% | **91.6 / 5.8 / 2.6%** |
+| Latency p50 / p95 | 6.4 / 10.6 s | 7.0 / 12.2 s | 8.1 / 13.7 s |
+| Mean tokens per answer | 2,262 | 2,373 | 2,523 |
 
-**Reading it.** The citation audit works: across 274 claims, no citation pointed to a passage the model wasn't given. Prompt v2 doubles correct abstention without losing any answerable question. Its answers are longer (164 vs 110 claims), and the automatic judge flags more of them as not supported (5.5% vs 0.9%). The judge is Qwen3-8B grading its own output, so both rates are likely optimistic. Human labels (§4.3) are the real measure.
+**Reading it.** Across 428 claims, no citation pointed to a passage the model wasn't given. Abstention doubled from the first run and held steady after that. The final configuration cites the right papers more often (0.75), and the automatic judge flags half as many claims as unsupported. That cost one answerable question (q33, a three-paper lineage question, now declined) and about 1 s per answer. The judge is Qwen3-8B grading its own output, so its rates are likely optimistic; human labels (§4.4) are the real measure.
 
-### 4.3 Citation support, human labels **[TEAM]**
+### 4.3 Fixes for the failures found in run 2
+
+Each fix targets a failure listed in §5. Each was developed on a tuning set, then run once on the curated test set.
+
+| Fix | How | Tuning set | Curated test set |
+|---|---|---|---|
+| **Per-entity retrieval** | A question naming 2+ methods also searches for each name separately, using the paper whose title or abstract introduces it | Both compared papers in the evidence: 7/12 → **11/12** questions (`comparison_dev`) | Gold papers in the evidence, comparison/multi-hop/disagreement questions (n = 19): 0.59 → **0.69**; all gold present 5 → **8** of 19 |
+| **Comparability check** | Prompt rule plus a code check: results from different papers are never "directly comparable" | Comparisons wrongly marked comparable: 4 → **0** | No comparison from different papers marked comparable |
+| **Survey attribution** | Survey passages are marked SURVEY; claims from them must be attributed | Applied in all v3 answers | Contributes to fewer "not supported" claims (5.5% → 2.6%) |
+| **Domain and named-thing checks** | Prompt rule for domain mismatch; code check that every name in the question appears in the evidence | Declined 7/12 unanswerable with the new prompt alone, 8/12 with the named-thing check (v2: 10/12 in its own run; a 2-question difference on n = 12 is within run-to-run noise); fired correctly on "Hindi" and "Rust" | 4/6 declined (unchanged) |
+
+**Robustness:** a dropped server connection crashed one tuning run. The API client now retries dropped connections and timeouts (not certificate errors), with a unit test. During the final run one request stalled for about 27 minutes on the server side before succeeding (q14). That's worth knowing for live demos: wait, then retry.
+
+**Tests:** 22 offline unit tests, plus 3 live tests that all pass (`RG_LIVE=1`): an end-to-end answer whose citations resolve to the right paper; **a prompt injection** (a planted passage telling the model to answer "PWNED-7731" and abstain was ignored, and the question was answered from real passages); and an out-of-scope medical question that was declined.
+
+### 4.4 Citation support, human labels **[TEAM]**
 
 60 sampled claims, each with its cited passages, are in `reports/citation_audit_sample.csv`. Label each one *supported / partial / not_supported*, then report: share supported = __ / 60; share partial = __; share not supported = __; agreement with the automatic judge = __%.
 
 ## 5. Failure analysis
 
-Failures from the final run, grouped by cause. Question IDs are in `data/eval/questions_v0.jsonl`; full outputs are in `query_runs`.
+Failures from run 2 (B3, prompt v2), grouped by cause. §4.3 shows which fixes were then built and what they changed. In the final run, the remaining answerability errors are q40 and q41 (unanswerable but answered) and q33 (answerable but declined). Question IDs are in `data/eval/questions_v0.jsonl`; full outputs are in `query_runs`.
 
 | Cause | Examples | What happened | Possible fix |
 |---|---|---|---|
@@ -131,4 +147,4 @@ Grow the curated set to about 100 reviewed questions with passage-level gold; ex
 
 ## 8. Reproducibility
 
-All commands are in the [README](../README.md). Seeds, manifests (`data/manifests/`), question sets and result JSON are committed. PDFs, the database and the indexes are rebuilt locally. Software versions are pinned in `requirements.txt`; the reranker model ID is recorded in `qasper_results.json`; the prompt version (`answer-v2`) and retrieval settings are logged with every answer in the `query_runs` table.
+All commands are in the [README](../README.md). Seeds, manifests (`data/manifests/`), question sets and result JSON are committed. PDFs, the database and the indexes are rebuilt locally. Software versions are pinned in `requirements.txt`; the reranker model ID is recorded in `qasper_results.json`; the prompt version (`answer-v3` final; v1 and v2 kept for comparison) and retrieval settings are logged with every answer in the `query_runs` table.

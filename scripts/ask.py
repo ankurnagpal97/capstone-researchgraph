@@ -20,7 +20,7 @@ if __name__ == "__main__":
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args()
 
-    res = Retriever().search(a.question, mode=a.mode, k=a.k)
+    res = Retriever().search_decomposed(a.question, mode=a.mode, k=a.k)
     if a.search_only:
         if res.graph_used:
             print("graph expansion added:", res.graph_papers)

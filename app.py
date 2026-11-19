@@ -64,7 +64,7 @@ with tab_ask:
     if go:
         try:
             with st.spinner("Retrieving…"):
-                res = retriever().search(q.strip(), mode=mode, k=k)
+                res = retriever().search_decomposed(q.strip(), mode=mode, k=k)
             with st.spinner("Asking Qwen3-8B (one request at a time per group key)…"):
                 ans = answer.ask(q.strip(), res)
             st.session_state["last"] = ans
@@ -78,6 +78,7 @@ with tab_ask:
         cv = ans.get("citation_validity")
         st.caption(f"{ans['latency_s']}s · {ans['usage'].get('total_tokens', '?')} tokens · mode {ans['mode']}"
                    + (f" · graph added {', '.join(ans['graph_papers'])}" if ans["graph_used"] else "")
+                   + (f" · searched separately for {', '.join(ans['entities'])}" if ans.get("entities") else "")
                    + (f" · citation IDs valid {cv:.0%}" if cv is not None else ""))
         st.subheader("Evidence given to the model")
         for e in ans["evidence"]:

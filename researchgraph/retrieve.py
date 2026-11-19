@@ -52,6 +52,7 @@ class Hit:
     url: str
     score: float
     via_graph: bool = False
+    scope_tag: str = ""
 
 
 @dataclass
@@ -61,6 +62,38 @@ class Result:
     hits: list
     graph_used: bool = False
     graph_papers: list = field(default_factory=list)
+    entities: list = field(default_factory=list)      # set when the question was decomposed per entity
+
+
+ENTITY_STOP = {"RAG", "LLM", "LLMs", "QA", "AI", "NLP", "IR", "GPU", "GPUs", "PDF", "API", "US", "MS", "MARCO", "SOTA"}
+ENTITIES_PER_SUBQUERY = 2   # passages guaranteed per named entity
+SUBQUERY_K = 4
+
+
+COMMON_CAPS = {"How", "What", "Which", "Why", "When", "Where", "Who", "Does", "Do", "Did", "Is", "Are", "Can",
+               "Compare", "Comparing", "In", "On", "For", "The", "A", "An", "And", "Or", "Of", "With", "From", "To",
+               "Between", "Versus", "Explain", "Describe", "List", "Give", "Show", "Both", "Wikipedia", "English"}
+
+
+def extract_entities(question: str) -> list[str]:
+    """Method, model or dataset names in a question, in order, no duplicates:
+    tokens with 2+ capitals (RAGAS, IRCoT, HippoRAG 2, Self-RAG, RA-DIT, Search-R1), a capital plus a digit
+    (Query2doc), or a capitalised word mid-sentence (Contriever, Atlas), joined with a following generic
+    acronym when there is one (Speculative RAG). Generic acronyms alone (RAG, LLM, QA...) are ignored."""
+    toks = list(re.finditer(r"[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*(?: \d\b)?", question))
+    out = []
+    for n, m in enumerate(toks):
+        tok = m.group(0)
+        caps = sum(ch.isupper() for ch in tok)
+        named = caps >= 2 or (caps >= 1 and any(ch.isdigit() for ch in tok) and not tok.isdigit())
+        midword = (caps == 1 and tok[0].isupper() and n > 0 and tok not in COMMON_CAPS
+                   and not question[:m.start()].rstrip().endswith((".", "?", "!", ":")))
+        if midword and n + 1 < len(toks) and toks[n + 1].group(0) in ENTITY_STOP \
+                and question[m.end():toks[n + 1].start()] == " ":
+            tok = f"{tok} {toks[n + 1].group(0)}"           # "Speculative RAG"
+        if (named or midword) and tok not in ENTITY_STOP and tok.rstrip("s") not in ENTITY_STOP and tok not in out:
+            out.append(tok)
+    return out
 
 
 class Retriever:
@@ -83,6 +116,16 @@ class Retriever:
         deg = A.sum(axis=1, keepdims=True)
         self.P = np.divide(A, deg, out=np.zeros_like(A), where=deg > 0)            # row-stochastic
         self._qcache: dict[str, np.ndarray] = {}
+        self.title_abs = {r["paper_id"]: (r["title"] or "") + " \n " + (r["abstract"] or "")
+                          for r in con.execute("SELECT paper_id, title, abstract FROM papers")}
+
+    def entity_owners(self, entity: str, max_owners: int = 2) -> list[str]:
+        """Papers that introduce `entity`: its name appears (case-sensitive, whole word) in their title or
+        abstract. Surveys mention many names in their body but rarely in the abstract. More than max_owners
+        matches means the name is too generic to point at one paper: return none."""
+        pat = re.compile(r"(?<![A-Za-z0-9-])" + re.escape(entity) + r"(?![A-Za-z0-9-])")
+        owners = [p for p, t in self.title_abs.items() if p in self.pidx and pat.search(t)]
+        return owners if 0 < len(owners) <= max_owners else []
 
     # -- first-stage rankers: chunk row indices, best first ------------------
     def rank_bm25(self, query: str) -> np.ndarray:
@@ -163,7 +206,8 @@ class Retriever:
                 continue
             per_paper[r["paper_id"]] = per_paper.get(r["paper_id"], 0) + 1
             out.append(Hit(r["chunk_id"], r["paper_id"], r["title"], r["year"], r["section"], r["page_start"],
-                           r["page_end"], r["text"], r["url"], round(float(s), 5), r["paper_id"] in graph_papers))
+                           r["page_end"], r["text"], r["url"], round(float(s), 5), r["paper_id"] in graph_papers,
+                           r["scope_tag"] or ""))
             if len(out) >= k:
                 break
         return out
@@ -172,6 +216,47 @@ class Retriever:
         from . import rerank
         s = rerank.scores(query, [index.doc_text(self.rows[i]) for i in idx])
         return sorted(zip(idx, s), key=lambda x: -x[1])
+
+    def search_decomposed(self, query: str, mode: str = "rerank", k: int = 10, graph: str = "auto") -> Result:
+        """For questions naming 2+ entities, also retrieve for each entity separately and guarantee each one
+        ENTITIES_PER_SUBQUERY passages at the front, so a comparison has evidence for every side.
+        Otherwise identical to search()."""
+        main = self.search(query, mode=mode, k=k, graph=graph)
+        ents = extract_entities(query)
+        if len(ents) < 2:
+            return main
+        rest = query
+        for e in ents:
+            rest = rest.replace(e, " ")
+        rest = re.sub(r"\s+", " ", rest).strip()
+        merged, seen, per_paper = [], set(), {}
+
+        def add(h):
+            if h.chunk_id in seen or per_paper.get(h.paper_id, 0) >= MAX_PER_PAPER:
+                return
+            seen.add(h.chunk_id)
+            per_paper[h.paper_id] = per_paper.get(h.paper_id, 0) + 1
+            merged.append(h)
+
+        subs = []
+        for e in ents:
+            sub = f"{e} {rest}"
+            owners = self.entity_owners(e)
+            if owners:     # the paper that introduced the name: its best passages for this sub-question
+                rd = self.rank_dense(sub)
+                idx = [int(i) for i in rd if self.paper_of[int(i)] in owners][:12]
+                scored = self._rerank(sub, idx) if mode in ("rerank", "graph1hop", "graph_ppr") else [(i, 0.0) for i in idx]
+                subs.append(self._hits(scored, SUBQUERY_K))
+            else:
+                subs.append(self.search(sub, mode=mode, k=SUBQUERY_K, graph="never").hits)
+        for rank in range(ENTITIES_PER_SUBQUERY):          # round-robin: every entity's best passage first
+            for hits in subs:
+                if rank < len(hits):
+                    add(hits[rank])
+        for h in main.hits:
+            add(h)
+        main.hits, main.entities = merged[:k], ents
+        return main
 
     def search(self, query: str, mode: str = "rerank", k: int = 10, graph: str = "auto") -> Result:
         if mode not in MODES:

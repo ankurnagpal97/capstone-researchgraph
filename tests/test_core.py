@@ -117,6 +117,7 @@ def _toy_retriever():
         A[R.pidx[a], R.pidx[b]] = A[R.pidx[b], R.pidx[a]] = 1
     deg = A.sum(1, keepdims=True)
     R.P = np.divide(A, deg, out=np.zeros_like(A), where=deg > 0)
+    R.title_abs = {}
     return R
 
 
@@ -151,3 +152,99 @@ def test_abstain_guard():
     assert g({"answerable": True, "evidence_check": "none", "short_answer": "X."})["answerable"] is False
     assert g({"answerable": True, "evidence_check": "E2", "short_answer": "Self-RAG uses reflection tokens [E2]."})["answerable"] is True
     assert g({"answerable": True, "short_answer": "It retrieves adaptively."})["answerable"] is True   # missing field: leave alone
+
+
+# -- failure fixes (answer-v3) ------------------------------------------------
+from researchgraph.retrieve import extract_entities  # noqa: E402
+
+
+def test_extract_entities():
+    assert extract_entities("How do RAGAS and ARES differ?") == ["RAGAS", "ARES"]
+    assert extract_entities("How does HippoRAG 2 build on HippoRAG?") == ["HippoRAG 2", "HippoRAG"]
+    assert extract_entities("Compare HyDE and Query2doc") == ["HyDE", "Query2doc"]
+    assert extract_entities("Is RAG better than LLMs for QA in 2024?") == []      # generic acronyms, years
+
+
+def _pack(papers):
+    return answer.build_pack(Result("q", "rerank", [_hit(i, pid) for i, pid in enumerate(papers)]))
+
+
+def test_comparability_guard_needs_one_paper():
+    pack = _pack(["2310.11511", "2401.15884"])
+    ans = {"comparisons": [{"what": "A vs B", "directly_comparable": True, "evidence": ["E1", "E2"]},
+                           {"what": "same table", "directly_comparable": True, "evidence": ["E1"]},
+                           {"what": "uncited", "directly_comparable": True},
+                           {"what": "already no", "directly_comparable": False, "evidence": ["E1", "E2"]}]}
+    out = [c["directly_comparable"] for c in answer.comparability_guard(ans, pack)["comparisons"]]
+    assert out == [False, True, False, False]
+    assert "2 different papers" in ans["comparisons"][0]["reason"]
+
+
+def test_survey_passages_are_marked():
+    h = _hit(1)
+    h.scope_tag = "survey"
+    pack = answer.build_pack(Result("q", "rerank", [h, _hit(2, "2401.15884")]))
+    text = answer.format_pack(pack)
+    assert text.count("SURVEY (secondary source") == 1
+    assert "SURVEY" not in answer.format_pack(pack, mark_surveys=False)
+
+
+def test_decomposition_gives_each_entity_evidence():
+    R = _toy_retriever()
+    hit = lambda cid, pid: Hit(cid, pid, pid, 2024, "s", 1, 1, "t", "u", 1.0)
+    canned = {"main": [hit("A#1", "A"), hit("A#2", "A"), hit("A#3", "A")],
+              "AlphaRAG": [hit("A#1", "A"), hit("A#4", "A")], "BetaRAG": [hit("B#1", "B"), hit("B#2", "B")]}
+
+    def fake_search(query, mode="rerank", k=10, graph="auto"):
+        key = "AlphaRAG" if query.startswith("AlphaRAG ") else "BetaRAG" if query.startswith("BetaRAG ") else "main"
+        return Result(query, mode, list(canned[key])[:k])
+    R.search = fake_search
+    res = R.search_decomposed("Compare AlphaRAG and BetaRAG on recall", k=5)
+    assert res.entities == ["AlphaRAG", "BetaRAG"]
+    assert [h.chunk_id for h in res.hits][:2] == ["A#1", "B#1"]          # every entity represented up front
+    assert {h.paper_id for h in res.hits} == {"A", "B"}
+    assert sum(h.paper_id == "A" for h in res.hits) <= 3                 # per-paper cap still holds
+
+
+def test_entity_owner_is_the_introducing_paper():
+    R = _toy_retriever()
+    R.title_abs = {"A": "Precise Zero-Shot Dense Retrieval \n we propose Hypothetical Document Embeddings (HyDE).",
+                   "B": "A Survey of RAG \n we review many methods.", "C": "HyDE-like tricks", "D": "Other"}
+    assert R.entity_owners("HyDE") == ["A"]              # "HyDE-like" is not a whole-word match
+    assert R.entity_owners("RAG") == ["B"]
+    R.title_abs = {p: "RAG everywhere" for p in "ABC"}
+    assert R.entity_owners("RAG") == []                  # too generic: more than 2 owners
+
+
+def test_entity_guard_needs_every_named_thing_in_evidence():
+    pack = _pack(["2310.11511"])                      # passages: "Self-RAG" title, text "text text ..."
+    a = answer.entity_guard({"answerable": True}, "What retriever does Google Gemini use with Self-RAG?", pack)
+    assert a["answerable"] is False and a["entity_guard"] == ["Google", "Gemini"]
+    b = answer.entity_guard({"answerable": True}, "How does Self-RAG decide when to retrieve?", pack)
+    assert b["answerable"] is True and "entity_guard" not in b
+
+
+def test_client_retries_dropped_connections_but_not_cert_errors():
+    import io, ssl, urllib.error
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from api_client import ApiError, Endpoint, RateLimiter
+
+    class Fake(Endpoint):
+        def __init__(self, script):
+            self.base_url, self.api_key, self.name, self.lock = "https://fake/v1", "k", "fake", None
+            self.retry_delays, self.slept, self.script = (2, 4, 8), [], list(script)
+            self.sleep, self.limiter = self.slept.append, RateLimiter(sleep=lambda s: None)
+
+        def _open(self, route, body=None, stream=False):
+            x = self.script.pop(0)
+            if isinstance(x, Exception):
+                raise x
+            return io.BytesIO(b'{"ok": true}')
+
+    f = Fake([ConnectionResetError(54, "reset"), urllib.error.URLError(TimeoutError("timed out")), "ok"])
+    assert f.request("/x") == {"ok": True} and f.slept == [2, 4]
+    g = Fake([urllib.error.URLError(ssl.SSLCertVerificationError("bad cert"))])
+    try:
+        g.request("/x"); assert False
+    except ApiError as e:
+        assert e.status == 0 and g.slept == []

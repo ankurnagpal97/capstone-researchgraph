@@ -24,7 +24,8 @@ seed_papers.tsv ──► expand_corpus.py ──► ingest.py ──► parse_c
 | Citation edges | OpenAlex reference lists, plus title or arXiv-ID matches in each PDF's reference list. Each edge records its source. | `ingest.py`, `parse_corpus.py` |
 | Indexes | Dense: bge-small-en-v1.5 from the course service (384 dimensions, cached by text hash). Sparse: in-memory BM25. | `researchgraph/index.py` |
 | Retrieval | B0 BM25 · B1 dense · B2 hybrid (RRF, k = 60) · **B3 hybrid + cross-encoder rerank (default)** · B4 B3 + one-hop citation expansion · B5 B3 + personalized PageRank over the citation graph. At most 3 chunks per paper. | `researchgraph/retrieve.py`, `researchgraph/rerank.py` |
-| Answers | One Qwen3-8B call: at most 7 passages / about 3,000 tokens of evidence → JSON claim ledger (≤ 1,024 tokens). The prompt checks the evidence first (`answer-v2`), and the code adds an abstention guard and a citation audit (claims citing passages that weren't provided are flagged). Every answer is logged to `query_runs`. | `researchgraph/answer.py` |
+| Answers | One Qwen3-8B call: at most 7 passages / about 3,000 tokens of evidence → JSON claim ledger (≤ 1,024 tokens). Prompt `answer-v3`: check the evidence first, decline on a domain mismatch, attribute claims from passages marked SURVEY, cite each comparison. Code checks: citation audit, abstention guard, and a comparability guard (results from different papers are never "directly comparable"). Every answer is logged to `query_runs`. | `researchgraph/answer.py` |
+| Per-entity retrieval | Questions naming 2+ methods (for example "RAGAS and ARES") also search for each name separately, using the paper whose title or abstract introduces it, so every side of a comparison has evidence | `Retriever.search_decomposed` |
 | API client | Retries 429/503 after 2, 4 and 8 seconds, sends 1 chat request at a time, stays under 60 per minute, checks `max_tokens` and batches embeddings 16 at a time. | `api_client.py`, `api_tests.ipynb` |
 
 ## Setup
@@ -57,7 +58,10 @@ seed_papers.tsv ──► expand_corpus.py ──► ingest.py ──► parse_c
 .venv/bin/python scripts/tune_answers.py               # prompt comparison on the answer-tuning set only
 .venv/bin/python scripts/eval_qasper.py --papers 60    # external benchmark (see QASPER below)
 .venv/bin/python scripts/make_report.py                # → reports/RESULTS.md
+.venv/bin/python scripts/tune_decompose.py             # per-entity retrieval on the comparison tuning set (no LLM)
+.venv/bin/python scripts/make_corpus_report.py         # → reports/CORPUS.md
 .venv/bin/python -m pytest -q                          # offline unit tests
+RG_LIVE=1 .venv/bin/python -m pytest -q tests/test_live.py   # live end-to-end + prompt-injection tests (3 API calls)
 ```
 
 **QASPER** (CC BY 4.0) is not committed. Download it with:
@@ -70,7 +74,8 @@ seed_papers.tsv ──► expand_corpus.py ──► ingest.py ──► parse_c
 | `questions_v0.jsonl` (curated) | 42: 14 single-paper, 9 comparison, 7 multi-hop, 3 disagreement, 3 metadata, 6 unanswerable | **Main test set** | Gold papers drafted from titles; **team review in `reports/gold_review_sheet.csv`** |
 | `synthetic_dev.jsonl` | 105 | Tuning | Exact gold passage (question written from it) |
 | `synthetic_test.jsonl` | 45 | Held out, reported once | Exact gold passage |
-| `answer_dev.jsonl` | 20 (8 unanswerable + 12 synthetic dev) | Tuning the answer prompt only | Answerable or not |
+| `answer_dev.jsonl` | 28 (12 unanswerable incl. 4 domain-mismatch, 12 synthetic dev, 4 comparisons) | Tuning the answer prompt only | Answerable or not |
+| `comparison_dev.jsonl` | 12 method pairs, none in the curated set | Tuning per-entity retrieval | Both papers of each pair |
 | QASPER test (60 papers, 194 questions) | external | Independent check of within-paper evidence retrieval | Human annotations |
 
 ## Data and licensing
