@@ -100,10 +100,10 @@ def _parse_json(text: str) -> dict:
     return json.loads(text[start:end + 1])
 
 
-NOT_ANSWERED = re.compile(r"\b(not (explicitly |directly |specifically )?(stated|provided|mentioned|given|addressed|reported|"
-                          r"specified|discussed|covered)|does not (specify|mention|provide|state|report|address|contain)|"
-                          r"do not (specify|mention|provide|state|report|address|contain)|no (information|evidence|passage)|"
-                          r"cannot be determined|insufficient evidence)\b", re.I)
+NOT_ANSWERED = re.compile(r"\b(not (explicitly |directly |specifically |clearly )?(stated|provided|mentioned|given|addressed|"
+                          r"reported|specified|discussed|covered|answered)|(does|do) not (explicitly |directly |specifically |"
+                          r"clearly )?(specify|mention|provide|state|report|address|contain|answer|say|give|compare|identify|"
+                          r"indicate)|no (information|evidence|passage)|cannot be determined|insufficient evidence)\b", re.I)
 
 
 def abstain_guard(ans: dict) -> dict:

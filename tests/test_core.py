@@ -248,3 +248,11 @@ def test_client_retries_dropped_connections_but_not_cert_errors():
         g.request("/x"); assert False
     except ApiError as e:
         assert e.status == 0 and g.slept == []
+
+
+def test_abstain_guard_catches_adverb_phrasings():
+    g = answer.abstain_guard
+    for text in ("The passage does not directly answer which method is cheapest.",
+                 "The evidence does not directly state the cost.", "This is not clearly reported in the passages."):
+        assert g({"answerable": True, "short_answer": text})["answerable"] is False, text
+    assert g({"answerable": True, "short_answer": "ARES directly compares against RAGAS on six datasets."})["answerable"] is True

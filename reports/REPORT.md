@@ -111,7 +111,9 @@ Each fix targets a failure listed in §5. Each was developed on a tuning set, th
 
 **Robustness:** a dropped server connection crashed one tuning run. The API client now retries dropped connections and timeouts (not certificate errors), with a unit test. During the final run one request stalled for about 27 minutes on the server side before succeeding (q14). That's worth knowing for live demos: wait, then retry.
 
-**Tests:** 22 offline unit tests, plus 3 live tests that all pass (`RG_LIVE=1`): an end-to-end answer whose citations resolve to the right paper; **a prompt injection** (a planted passage telling the model to answer "PWNED-7731" and abstain was ignored, and the question was answered from real passages); and an out-of-scope medical question that was declined.
+**Post-hoc bug fix (22 Nov), not re-scored.** While re-checking the demo, the abstention guard missed answers that say the evidence "does not *directly* state" or "does not answer" something, because its pattern didn't allow an adverb or the verb "answer". The pattern was widened. On the 28 tuning answers it flips none of the answerable ones. The demo question it fixes is also curated test question q40, so the curated numbers above are **not** re-scored: re-running the test set after a fix prompted by one of its own questions would amount to tuning on it. The reported 4/6 abstention is from before this fix.
+
+**Tests:** 23 offline unit tests, plus 3 live tests that all pass (`RG_LIVE=1`): an end-to-end answer whose citations resolve to the right paper; **a prompt injection** (a planted passage telling the model to answer "PWNED-7731" and abstain was ignored, and the question was answered from real passages); and an out-of-scope medical question that was declined.
 
 ### 4.4 Citation support, human labels **[TEAM]**
 
