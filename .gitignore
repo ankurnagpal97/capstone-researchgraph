@@ -16,3 +16,5 @@ data/index/
 logs/
 # stage-eval answer cache: holds full passage text (not redistributed); rebuild with scripts/eval_stages.py
 reports/stage_answers.jsonl
+reports/agent_answers.jsonl
+reports/prompt_answers.jsonl

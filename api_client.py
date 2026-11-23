@@ -38,6 +38,8 @@ def load_env(path=None):
     """Load KEY=VALUE lines from .env into os.environ (existing vars win)."""
     path = path or os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
     if not os.path.exists(path):
+        if os.environ.get("LLM_API_KEY"):      # e.g. Docker env_file: variables already set
+            return
         raise FileNotFoundError("No .env found — copy .env.example to .env and fill it in.")
     for line in open(path):
         line = line.strip()

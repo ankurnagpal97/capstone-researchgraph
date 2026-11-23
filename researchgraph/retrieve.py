@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from . import db, index
+from . import db, index, tracing
 
 SYSTEMS = {"bm25": "B0 BM25", "dense": "B1 Dense", "hybrid": "B2 Hybrid", "rerank": "B3 Hybrid+rerank",
            "graph1hop": "B4 +1-hop graph", "graph_ppr": "B5 +PageRank graph"}
@@ -214,7 +214,8 @@ class Retriever:
 
     def _rerank(self, query: str, idx: list[int]) -> list[tuple[int, float]]:
         from . import rerank
-        s = rerank.scores(query, [index.doc_text(self.rows[i]) for i in idx])
+        with tracing.span("retrieve.rerank", candidates=len(idx)):
+            s = rerank.scores(query, [index.doc_text(self.rows[i]) for i in idx])
         return sorted(zip(idx, s), key=lambda x: -x[1])
 
     def search_decomposed(self, query: str, mode: str = "rerank", k: int = 10, graph: str = "auto") -> Result:
@@ -259,6 +260,13 @@ class Retriever:
         return main
 
     def search(self, query: str, mode: str = "rerank", k: int = 10, graph: str = "auto") -> Result:
+        with tracing.span("retrieve.search", mode=mode, k=k, query=query[:200]) as sp:
+            res = self._search(query, mode, k, graph)
+            sp.set("graph_used", res.graph_used)
+            sp.set("papers", len({h.paper_id for h in res.hits}))
+            return res
+
+    def _search(self, query: str, mode: str, k: int, graph: str) -> Result:
         if mode not in MODES:
             raise ValueError(f"mode must be one of {MODES}")
         as_scored = lambda ranking: [(int(i), 1.0 / (RRF_K + n + 1)) for n, i in enumerate(ranking[:POOL * 4])]

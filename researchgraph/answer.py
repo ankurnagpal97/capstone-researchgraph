@@ -13,7 +13,7 @@ import re
 import time
 import uuid
 
-from . import db, parse
+from . import db, parse, tracing
 from .llm import ApiError, client
 from .retrieve import Result
 
@@ -67,6 +67,36 @@ You are given numbered evidence passages (E1, E2, ...) from papers. Rules:
 Reply with ONLY a JSON object, no markdown, in this shape:
 {"evidence_check": "which passage(s) directly answer the question, or 'none'", "answerable": true, "short_answer": "2-4 sentences", "claims": [{"text": "one factual claim", "evidence": ["E1"]}], "comparisons": [{"what": "A vs B on X", "directly_comparable": false, "reason": "...", "evidence": ["E1", "E3"]}], "limitations": ["..."], "missing_evidence": ["..."]}
 Keep it under 600 words. Use empty lists when a field has nothing."""
+
+
+# -- prompting-strategy variants (scripts/compare_prompts.py); same rules and code checks as v3 ----------
+FEWSHOT = """
+
+Two examples of the expected behaviour (invented passages, for format only):
+
+Example 1. Question: When does FooRAG decide to retrieve?
+[E1] FooRAG: Adaptive Retrieval (2024) | section: 3 Method | p.3
+FooRAG retrieves only when the probability of the next token falls below 0.4; otherwise it keeps generating.
+[E2] A Survey of RAG (2025) | section: 2 Adaptive retrieval | p.5 | SURVEY
+Adaptive methods such as FooRAG trigger retrieval from model confidence.
+Reply: {"evidence_check": "E1 directly answers it", "answerable": true, "short_answer": "FooRAG retrieves only when its next-token probability drops below 0.4.", "claims": [{"text": "FooRAG retrieves only when the next-token probability falls below 0.4.", "evidence": ["E1"]}, {"text": "According to A Survey of RAG, FooRAG triggers retrieval from model confidence.", "evidence": ["E2"]}], "comparisons": [], "limitations": [], "missing_evidence": []}
+
+Example 2. Question: How accurate is FooRAG on Indian court judgments?
+[E1] FooRAG: Adaptive Retrieval (2024) | section: 5 Results | p.6
+On Natural Questions FooRAG reaches 41.2 exact match.
+Reply: {"evidence_check": "none", "answerable": false, "short_answer": "The passages do not report FooRAG on Indian court judgments; the only result is on Natural Questions.", "claims": [{"text": "FooRAG reaches 41.2 exact match on Natural Questions.", "evidence": ["E1"]}], "comparisons": [], "limitations": [], "missing_evidence": ["FooRAG results on Indian legal documents"]}"""
+
+COT = """
+Before the other fields, think step by step in a "reasoning" field (at most 120 words): what exactly the question asks,
+which passage addresses each part, and whether they DIRECTLY answer it. Then fill the other fields consistently with it.
+The JSON object must start with "reasoning": {"reasoning": "...", "evidence_check": "...", "answerable": true, ...}"""
+
+DECOMP = """
+The question has been split into sub-questions. Use the evidence to address each sub-question in your claims, then
+answer the main question in short_answer. If evidence is missing for a sub-question, say so in missing_evidence."""
+
+PROMPTS = {"answer-v3": SYSTEM, "answer-v3-fewshot": SYSTEM + FEWSHOT, "answer-v3-cot": SYSTEM + COT,
+           "answer-v3-decomp": SYSTEM + DECOMP}
 
 
 def build_pack(result: Result) -> list[dict]:
@@ -163,19 +193,26 @@ def audit(ans: dict, pack: list[dict]) -> dict:
     return ans
 
 
-def ask(question: str, result: Result, log: bool = True, prompt_version: str = PROMPT_VERSION) -> dict:
+def ask(question: str, result: Result, log: bool = True, prompt_version: str = PROMPT_VERSION,
+        subquestions: list[str] | None = None) -> dict:
     """Answer `question` from `result` (the retrieval output). Returns the audited answer dict."""
+    from .guard import scrub_pii
+    question, pii = scrub_pii(question)          # personal data never reaches the model or the logs
     pack = build_pack(result)
     v1 = prompt_version == "answer-v1"
-    v3 = prompt_version == "answer-v3"
-    system = {"answer-v1": SYSTEM_V1, "answer-v2": SYSTEM_V2}.get(prompt_version, SYSTEM)
-    user = f"Question: {question}\n\nEvidence passages:\n\n{format_pack(pack, mark_surveys=v3)}"
+    v3 = prompt_version.startswith("answer-v3")
+    system = {"answer-v1": SYSTEM_V1, "answer-v2": SYSTEM_V2, **PROMPTS}.get(prompt_version, SYSTEM)
+    subs = "".join(f"\n  {i + 1}. {x}" for i, x in enumerate(subquestions or []))
+    user = (f"Question: {question}" + (f"\nSub-questions:{subs}" if subs else "")
+            + f"\n\nEvidence passages:\n\n{format_pack(pack, mark_surveys=v3)}")
     messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
-    t0, usage, raw, error = time.time(), {}, "", None
+    t0, usage, raw, error, json_retries = time.time(), {}, "", None, 0
     ans = None
     for attempt in range(2):
         try:
-            r = client().chat(messages, max_tokens=MAX_OUTPUT_TOKENS, temperature=0.1)
+            with tracing.span("llm.answer", attempt=attempt, prompt_version=prompt_version, passages=len(pack)) as sp:
+                r = client().chat(messages, max_tokens=MAX_OUTPUT_TOKENS, temperature=0.1)
+                sp.set("tokens", int((r.get("usage") or {}).get("total_tokens") or 0))
         except ApiError as e:
             error = f"API error {e.status}"
             break
@@ -187,6 +224,7 @@ def ask(question: str, result: Result, log: bool = True, prompt_version: str = P
             ans = _parse_json(raw)
             break
         except (ValueError, json.JSONDecodeError) as e:
+            json_retries += 1
             error = f"invalid JSON: {e}"
             messages += [{"role": "assistant", "content": raw},
                          {"role": "user", "content": f"That was not valid JSON ({e}). Reply again with only the JSON object."}]
@@ -199,7 +237,7 @@ def ask(question: str, result: Result, log: bool = True, prompt_version: str = P
         ans = comparability_guard(ans, pack)
         ans = entity_guard(ans, question, pack)
     ans = audit(ans, pack)
-    ans.update({"prompt_version": prompt_version, "entities": getattr(result, "entities", []),
+    ans.update({"json_retries": json_retries, "pii_removed": pii, "prompt_version": prompt_version, "entities": getattr(result, "entities", []),
                 "question": question, "mode": result.mode, "graph_used": result.graph_used,
                 "graph_papers": result.graph_papers, "latency_s": round(time.time() - t0, 2), "usage": usage,
                 "evidence": [{"label": p["label"], "chunk_id": p["hit"].chunk_id, "paper_id": p["hit"].paper_id,
@@ -243,8 +281,9 @@ def suggest_followups(ans: dict) -> list[str]:
             "Papers the evidence came from:\n" + "\n".join(f"- {t}" for t in titles))
     t0 = time.time()
     try:
-        r = client().chat([{"role": "system", "content": FOLLOWUP_SYSTEM}, {"role": "user", "content": user}],
-                          max_tokens=FOLLOWUP_MAX_TOKENS, temperature=0.3)
+        with tracing.span("llm.followups"):
+            r = client().chat([{"role": "system", "content": FOLLOWUP_SYSTEM}, {"role": "user", "content": user}],
+                              max_tokens=FOLLOWUP_MAX_TOKENS, temperature=0.3)
         items = _parse_json(r["choices"][0]["message"]["content"] or "").get("followups", [])
     except (ApiError, ValueError, json.JSONDecodeError, KeyError, AttributeError):
         items = []

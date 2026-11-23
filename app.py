@@ -4,11 +4,12 @@ Run: .venv/bin/streamlit run app.py
 """
 import json
 import os
+import uuid
 
 import pandas as pd
 import streamlit as st
 
-from researchgraph import ROOT, answer, db
+from researchgraph import ROOT, agent, answer, db, guard, tracing
 from researchgraph.llm import ApiError
 from researchgraph.retrieve import Retriever
 
@@ -34,6 +35,11 @@ EXAMPLES = [
 @st.cache_resource(show_spinner="Loading indexes…")
 def retriever():
     return Retriever()
+
+
+@st.cache_resource
+def limiter():
+    return guard.AppLimiter()      # one per server process, shared by all browser sessions
 
 
 def edges_df():
@@ -69,6 +75,15 @@ with tab_ask:
         st.selectbox("Examples", [""] + EXAMPLES, key="example", on_change=_set_example)
         want_followups = st.toggle("Suggest follow-up questions", value=True,
                                    help="One extra Qwen3-8B call after each answer (about 2-4 s).")
+        agent_mode = st.toggle("Agent mode (plan → tools → answer → critic)", value=False,
+                               help="A planner picks tools (search, read one paper, citation neighbours, paper info), "
+                                    "a critic can ask for one more round, and earlier turns are remembered. "
+                                    "3-5 Qwen3-8B calls, about 15-40 s.")
+        sid = st.session_state.setdefault("session_id", uuid.uuid4().hex[:12])
+        if agent_mode and st.button("New conversation", help="Forget earlier turns of this session"):
+            agent.forget(sid)
+            st.session_state["session_id"] = uuid.uuid4().hex[:12]
+            st.session_state.pop("trail", None)
     with c1:
         st.text_area("Question", key="q", height=90,
                      placeholder="e.g. Which methods decide adaptively when to retrieve?")
@@ -77,14 +92,42 @@ with tab_ask:
     if st.session_state.pop("autorun", False) and q.strip():
         go = True
     if go:
+        q_clean, pii = guard.scrub_pii(q.strip())
+        if pii:
+            st.info("Removed personal data from the question before sending it: " + ", ".join(pii).lower()
+                    + ". Questions about the papers don't need it.")
+        settings = {"mode": mode, "k": k, "prompt": answer.PROMPT_VERSION, "followups": want_followups}
+        ckey = guard.cache_key(q_clean, **settings)
+        hit = None if agent_mode else guard.cache_get(ckey)
+        ok, wait, why = (True, 0, "") if hit else limiter().check(st.session_state["session_id"])
+        if hit:
+            hit["cached"] = True
+            st.session_state["last"] = hit
+            trail = st.session_state.setdefault("trail", [])
+            if not trail or trail[-1] != q_clean:
+                trail.append(q_clean)
+            go = False
+        elif not ok:
+            st.warning(f"Rate limit: {why}. Try again in {wait:.0f} s.")
+            go = False
+        q = q_clean
+    if go:
         try:
-            with st.spinner("Retrieving…"):
-                res = retriever().search_decomposed(q.strip(), mode=mode, k=k)
-            with st.spinner("Asking Qwen3-8B (one request at a time per group key)…"):
-                ans = answer.ask(q.strip(), res)
+            if agent_mode:
+                with st.spinner("Agent: planning, calling tools, answering, checking (15-40 s)…"):
+                    ans = agent.Agent(retriever(), session_id=st.session_state["session_id"]).run(q.strip())
+            else:
+                with tracing.span("pipeline.task", mode=mode, question=q.strip()[:200]) as task:
+                    with st.spinner("Retrieving…"):
+                        res = retriever().search_decomposed(q.strip(), mode=mode, k=k)
+                    with st.spinner("Asking Qwen3-8B (one request at a time per group key)…"):
+                        ans = answer.ask(q.strip(), res)
+                    ans["trace_id"] = task.trace_id
             if want_followups:
                 with st.spinner("Suggesting follow-up questions…"):
                     answer.suggest_followups(ans)
+            if not agent_mode:
+                guard.cache_put(ckey, q, settings, ans)
             st.session_state["last"] = ans
             trail = st.session_state.setdefault("trail", [])
             if not trail or trail[-1] != q.strip():
@@ -99,7 +142,8 @@ with tab_ask:
             st.caption("Question trail: " + "  →  ".join(st.session_state["trail"][-4:]))
         st.markdown(answer.render_markdown(ans))
         cv = ans.get("citation_validity")
-        st.caption(f"{ans['latency_s']}s · {ans['usage'].get('total_tokens', '?')} tokens · mode {ans['mode']}"
+        st.caption(("cached answer, no model call · " if ans.get("cached") else "")
+                   + f"{ans['latency_s']}s · {ans['usage'].get('total_tokens', '?')} tokens · mode {ans['mode']}"
                    + (f" · graph added {', '.join(ans['graph_papers'])}" if ans["graph_used"] else "")
                    + (f" · searched separately for {', '.join(ans['entities'])}" if ans.get("entities") else "")
                    + (f" · citation IDs valid {cv:.0%}" if cv is not None else ""))
@@ -109,6 +153,31 @@ with tab_ask:
                 st.button(f"→ {f}", key=f"fu{i}", on_click=_ask_followup, args=(f,), width="stretch")
             st.caption(f"Suggested by Qwen3-8B from this answer and its source papers ({ans.get('followup_latency_s', '?')}s). "
                        "Click one to ask it; new suggestions follow each answer.")
+        g = ans.get("agent")
+        if g:
+            with st.expander(f"Agent steps · {g['n_tool_calls']} tool calls · {g['n_llm_calls']} LLM calls · "
+                             f"{g['rounds']} round(s) · stop: {g['stop_reason']}"):
+                if g["standalone_question"] != g["question"]:
+                    st.markdown(f"**Question rewritten from the conversation:** {g['standalone_question']}")
+                st.dataframe(pd.DataFrame([{"round": c["round"], "tool": c["tool"], "args": json.dumps(c["args"]),
+                                            "status": c["status"], "result": c.get("note") or c.get("error", ""),
+                                            "s": c.get("seconds")} for c in g["tool_calls"]]),
+                             hide_index=True, width="stretch")
+                for c in g["critiques"]:
+                    st.markdown(f"**Critic, round {c['round']}: {c['verdict']}**"
+                                + (" — " + "; ".join(c["problems"]) if c["problems"] else "")
+                                + (f" · new searches: {', '.join(c['new_queries'])}" if c["verdict"] == "retry" else ""))
+                for f in g["fallbacks"]:
+                    st.warning(f"Recovered from: {f}")
+        trace_id = (g or {}).get("trace_id") or ans.get("trace_id")
+        spans = tracing.read_trace(trace_id) if trace_id else []
+        if spans:
+            with st.expander(f"Trace (OpenTelemetry) · {len(spans)} spans · {spans[0]['duration_ms'] / 1000:.1f}s"):
+                t0 = spans[0]["start"]
+                st.dataframe(pd.DataFrame([{"span": s["name"], "start (s)": round(s["start"] - t0, 2),
+                                            "ms": s["duration_ms"], "tokens": s["attributes"].get("tokens"),
+                                            "status": s["status"]} for s in spans]), hide_index=True, width="stretch")
+                st.caption(f"trace_id `{trace_id}` · stored in logs/traces.jsonl")
         st.subheader("Evidence given to the model")
         for e in ans["evidence"]:
             pages = f"p.{e['page_start']}" if e["page_start"] == e["page_end"] else f"pp.{e['page_start']}–{e['page_end']}"

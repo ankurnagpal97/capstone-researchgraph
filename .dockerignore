@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+secrets/
+data/
+logs/
+.venv/
+**/__pycache__/
+.pytest_cache/
+reports/demo/
+reports/*.jsonl
+reports/*.csv
+*.crt
+*.key
+*.pem
+.git/

@@ -295,3 +295,122 @@ def test_stage_metrics():
     hits = [Hit(f"P#{i}", "P" if i == 2 else "Q", "t", 2024, "s", 1, 1, "x", "u", 1.0) for i in range(5)]
     assert E.ndcg10(hits, {"P#2"}, {"P"}) == pytest.approx(1 / math.log2(4))
     assert E.ndcg10(hits, set(), {"P"}) == pytest.approx(1 / math.log2(4))
+
+
+# -- agent: planner -> executor -> generator -> critic ---------------------------------------------
+def _agent_setup(monkeypatch, planner, critic):
+    from researchgraph import agent
+    R = _toy_retriever()
+    hit = lambda cid, pid, s=1.0: Hit(cid, pid, f"Paper {pid}", 2024, "s", 1, 1, f"text about {pid} retrieval", "u", s)
+    canned = {"alpha": [hit("A#1", "A"), hit("A#2", "A")], "beta": [hit("B#1", "B")], "gap": [hit("C#1", "C")]}
+    searched = []
+
+    def fake_search(q, mode="rerank", k=10, graph="auto"):
+        searched.append(q)
+        return Result(q, mode, list(next((v for key, v in canned.items() if key in q.lower()), canned["alpha"])))
+    R.search_decomposed = fake_search
+    replies = {"plan": list(planner), "critic": list(critic)}
+
+    class FakeClient:
+        llm = type("M", (), {"model": "fake"})()
+
+        def chat(self, messages, **kw):
+            sysmsg = messages[0]["content"]
+            kind = "plan" if sysmsg == agent.PLANNER_SYSTEM else "critic" if sysmsg == agent.CRITIC_SYSTEM else "answer"
+            content = replies[kind].pop(0) if kind != "answer" else \
+                '{"answerable": true, "short_answer": "Alpha retrieves.", "claims": [{"text": "Alpha retrieves", "evidence": ["E1"]}]}'
+            return {"choices": [{"message": {"content": content}}], "usage": {"total_tokens": 1000}}
+    monkeypatch.setattr(agent, "client", lambda: FakeClient())
+    monkeypatch.setattr(answer, "client", lambda: FakeClient())
+    monkeypatch.setattr(agent, "history", lambda sid, n=3: [])
+    return agent, R, searched
+
+
+def test_agent_happy_path(monkeypatch):
+    plan = '{"standalone_question": "How does alpha compare with beta?", "plan": [' \
+           '{"tool": "search_papers", "args": {"query": "alpha"}}, {"tool": "search_papers", "args": {"query": "beta"}}]}'
+    agent, R, searched = _agent_setup(monkeypatch, [plan], ['{"verdict": "accept"}'])
+    ans = agent.Agent(R, session_id="t", log=False).run("How does it compare with beta?")
+    a = ans["agent"]
+    assert a["standalone_question"] == "How does alpha compare with beta?"
+    assert (a["n_tool_calls"], a["n_llm_calls"], a["rounds"], a["stop_reason"]) == (2, 3, 1, "accepted")
+    assert a["completed"] and ans["mode"] == "agent" and ans["citation_validity"] == 1.0
+    assert [e["chunk_id"] for e in ans["evidence"]][:2] == ["A#1", "B#1"]      # every tool call represented first
+
+
+def test_agent_survives_bad_json_unknown_tools_and_loops(monkeypatch):
+    agent, R, searched = _agent_setup(monkeypatch, ["not json", "still not json"], ['{"verdict": "accept"}'])
+    ans = agent.Agent(R, session_id="t", log=False).run("alpha?")
+    a = ans["agent"]
+    assert a["json_errors"] == 2 and any("planner" in f for f in a["fallbacks"]) and a["completed"]
+    assert a["tool_calls"][0]["args"] == {"query": "alpha?"}                  # fallback plan: one plain search
+
+    plan = '{"plan": [{"tool": "delete_files", "args": {}}, {"tool": "search_papers", "args": {"query": "alpha"}},' \
+           '{"tool": "search_papers", "args": {"query": "alpha"}}, {"tool": "read_paper", "args": {"paper": "no such thing"}}]}'
+    agent, R, searched = _agent_setup(monkeypatch, [plan], ['{"verdict": "accept"}'])
+    a = agent.Agent(R, session_id="t", log=False).run("alpha?")["agent"]
+    assert [c["status"] for c in a["tool_calls"]] == ["error", "ok", "skipped", "error"]
+    assert a["tool_errors"] == 2 and a["n_tool_calls"] == 3 and a["completed"]
+
+
+def test_agent_critic_retry_then_stops(monkeypatch):
+    plan = '{"plan": [{"tool": "search_papers", "args": {"query": "alpha"}}]}'
+    critic = '{"verdict": "retry", "problems": ["no evidence on the gap"], "new_queries": ["gap"]}'
+    agent, R, searched = _agent_setup(monkeypatch, [plan], [critic])
+    a = agent.Agent(R, session_id="t", log=False, max_rounds=2).run("alpha and the gap?")["agent"]
+    assert searched == ["alpha", "gap"] and a["rounds"] == 2 and a["stop_reason"] == "max rounds"
+    assert a["n_llm_calls"] == 4                                              # plan, answer, critic, answer
+
+    agent, R, searched = _agent_setup(monkeypatch, [plan], [critic])
+    ans = agent.Agent(R, session_id="t", log=False, token_budget=1000).run("alpha?")
+    assert ans["agent"]["stop_reason"] == "token budget" and not ans["agent"]["completed"]
+
+
+def test_agent_pool_round_robin():
+    from researchgraph import agent
+    h = lambda cid, pid, s: Hit(cid, pid, pid, 2024, "s", 1, 1, "t", "u", s)
+    calls = [[h("A#1", "A", 5), h("A#2", "A", 4), h("A#3", "A", 3), h("A#4", "A", 2)], [h("B#1", "B", -3), h("B#2", "B", -4)]]
+    got = [x.chunk_id for x in agent.pool(calls)]
+    assert got[:4] == ["A#1", "B#1", "A#2", "B#2"] and got.count("A#4") == 0   # per-paper cap 3
+
+
+# -- serving guards: rate limits, cache, PII ---------------------------------------------------------
+def test_rate_limiter_sliding_windows():
+    from researchgraph import guard
+    now = [0.0]
+    lim = guard.RateLimiter(((2, 10), (3, 100)), clock=lambda: now[0])
+    assert lim.check("u")[0] and lim.check("u")[0]
+    ok, wait = lim.check("u")
+    assert not ok and wait == 10                     # 2 per 10 s
+    assert lim.check("other")[0]                     # keys are independent
+    now[0] = 11
+    assert lim.check("u")[0]                         # window slid
+    now[0] = 25
+    ok, wait = lim.check("u")
+    assert not ok and wait == 75                     # 3 per 100 s
+
+
+def test_answer_cache_roundtrip(tmp_path, monkeypatch):
+    from researchgraph import db, guard
+    path = str(tmp_path / "t.db")
+    real = db.connect
+    monkeypatch.setattr(guard.db, "connect", lambda *a: real(path))
+    k1 = guard.cache_key("How does Self-RAG work?", mode="rerank", k=10)
+    assert k1 == guard.cache_key("  how does self-rag work ", mode="rerank", k=10)   # normalised
+    assert k1 != guard.cache_key("How does Self-RAG work?", mode="bm25", k=10)
+    assert guard.cache_get(k1) is None
+    guard.cache_put(k1, "q", {"mode": "rerank"}, {"short_answer": "x"})
+    assert guard.cache_get(k1) == {"short_answer": "x"}
+    assert guard.cache_get(k1, ttl=-1) is None                                       # expired
+    k2 = guard.cache_key("err")
+    guard.cache_put(k2, "q", {}, {"error": "API error 503"})
+    assert guard.cache_get(k2) is None                                               # failures never cached
+
+
+def test_pii_scrubbing_keeps_research_numbers():
+    from researchgraph.guard import scrub_pii
+    t, f = scrub_pii("I'm jane.doe@uni.edu, +91 98765 43210, card 4111 1111 1111 1111, PAN ABCDE1234F, host 10.0.0.12")
+    assert f == ["CARD", "EMAIL", "IP", "PAN", "PHONE"] and "jane" not in t and "4111" not in t
+    for safe in ["What does arXiv 2310.11511 report?", "EM 45.6 vs 38.2 at k=5 on 2,000 docs in 2024 (Table 3)",
+                 "512 768 1024 2048 dimensions", "1234 5678 9012 3456"]:
+        assert scrub_pii(safe) == (safe, []), safe

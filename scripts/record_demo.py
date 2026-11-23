@@ -34,6 +34,8 @@ APP = "http://localhost:8502"
 TTS_CACHE = os.path.join(os.path.expanduser("~"), ".cache", "researchgraph_tts")
 Q_SINGLE = "How does Self-RAG use reflection tokens to decide when to retrieve and to critique its own generations?"
 Q_ABSTAIN = "Which RAG method has the lowest carbon footprint per query?"
+Q_AGENT = "How do RAGAS and ARES differ in how they evaluate RAG systems?"
+Q_AGENT_FU = "What are the limitations of the second one?"
 LLM_TIMEOUT = 150_000
 
 CARD = """<html><body style="margin:0;width:{w}px;height:{h}px;background:{bg};color:{fg};font-family:-apple-system,Helvetica,Arial;
@@ -171,7 +173,17 @@ NARRATION = {
     "click_fu": "Clicking a suggestion asks it straight away. The question trail keeps the chain of questions, and "
                 "every new answer brings fresh suggestions, so you can keep exploring the literature.",
     "answer_fu": "The follow-up is answered the same way, with its own citations and its own next questions.",
-    "ask_abstain": "Now a question the papers cannot answer: which RAG method has the lowest carbon footprint per query?",
+    "agent_on": "Next, agent mode. A planner, one Kwen call, reads the question and picks tools: search the papers, "
+                "read one paper, follow citation neighbours, or look up paper details. The executor runs them, the "
+                "answer is generated as before, and a critic decides whether one more round of searching is needed.",
+    "agent_steps": "The agent steps panel shows every tool call, its result, and the critic's verdict. Each task is "
+                   "capped at two rounds, eight tool calls and twenty thousand tokens, and bad JSON or a failing tool "
+                   "is recovered from rather than crashing.",
+    "agent_memory": "The agent remembers the conversation. Asked, what are the limitations of the second one, it "
+                    "rewrites the question using the earlier turn, so it searches for ARES.",
+    "trace": "Every run is traced with OpenTelemetry: the plan, each tool call, each search and rerank, and each "
+             "model call with its tokens and timing.",
+    "ask_abstain": "Back in the default pipeline, a question the papers cannot answer: which RAG method has the lowest carbon footprint per query?",
     "abstain": "The system says it is not established by the indexed papers, and lists what is missing, instead of "
                "guessing.",
     "graph": "The citation neighbours view shows which corpus papers cite each other. A citation is never treated as "
@@ -279,6 +291,50 @@ def main():
         r.scene("click_fu", clips, click_fu)
         r.scene("answer_fu", clips, lambda: r.scroll(500, steps=6, pause=350))
 
+        def agent_on():
+            r.scroll_top()
+            tog = page.get_by_text("Agent mode (plan", exact=False)
+            r.highlight(tog, 600)
+            tog.click()
+            r.wait_idle(10_000)
+            r.ask(Q_AGENT)
+            r.wait_idle()
+            r.scroll_top()
+        r.scene("agent_on", clips, agent_on)
+
+        def agent_steps():
+            exp = page.locator('[data-testid="stExpander"] summary', has_text="Agent steps").first
+            exp.scroll_into_view_if_needed()
+            r.highlight(exp, 500)
+            exp.click()
+            page.wait_for_timeout(800)
+            r.scroll(350, steps=5, pause=400)
+        r.scene("agent_steps", clips, agent_steps)
+
+        def agent_memory():
+            r.scroll_top()
+            r.ask(Q_AGENT_FU)
+            r.wait_idle()
+            exp = page.locator('[data-testid="stExpander"] summary', has_text="Agent steps").first
+            exp.scroll_into_view_if_needed()
+            exp.click()
+            page.wait_for_timeout(600)
+            r.highlight(page.get_by_text("Question rewritten from the conversation", exact=False), 1200)
+        r.scene("agent_memory", clips, agent_memory)
+
+        def trace():
+            exp = page.locator('[data-testid="stExpander"] summary', has_text="Trace (OpenTelemetry)").first
+            exp.scroll_into_view_if_needed()
+            r.highlight(exp, 500)
+            exp.click()
+            page.wait_for_timeout(800)
+            r.scroll(300, steps=4, pause=400)
+            r.scroll_top()
+            tog = page.get_by_text("Agent mode (plan", exact=False)
+            tog.click()                         # back to the default pipeline
+            r.wait_idle(10_000)
+        r.scene("trace", clips, trace)
+
         def ask_abstain():
             r.scroll_top()
             r.ask(Q_ABSTAIN)
@@ -307,8 +363,8 @@ def main():
         r.scene("eval2", clips, lambda: r.scroll(900, steps=12, pause=600))
 
         page.set_content(card("THANK YOU", "AI ResearchGraph",
-                              "Cited claims · comparability flags · abstention · follow-up questions · "
-                              "stage-by-stage evaluation"))
+                              "Cited claims · abstention · follow-up questions · agent mode with memory · "
+                              "tracing · stage-by-stage evaluation"))
         r.scene("outro", clips, min_after=1.5)
         total = r.now()
         video_path = page.video.path()

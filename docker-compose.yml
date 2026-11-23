@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    image: researchgraph:latest
+    ports:
+      - "8501:8501"
+    env_file: .env                  # API keys; never copied into the image
+    environment:
+      RG_TRACING: "1"
+    volumes:
+      - ./data:/app/data            # papers DB + indexes (built locally with scripts/ingest.py, build_index.py)
+      - ./secrets:/app/secrets:ro   # course CA certificates
+      - ./logs:/app/logs            # traces.jsonl and logs persist outside the container
+    restart: unless-stopped

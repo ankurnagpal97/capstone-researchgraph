@@ -27,6 +27,9 @@ seed_papers.tsv ──► expand_corpus.py ──► ingest.py ──► parse_c
 | Answers | One Qwen3-8B call: at most 7 passages / about 3,000 tokens of evidence → JSON claim ledger (≤ 1,024 tokens). Prompt `answer-v3`: check the evidence first, decline on a domain mismatch, attribute claims from passages marked SURVEY, cite each comparison. Code checks: citation audit, abstention guard, and a comparability guard (results from different papers are never "directly comparable"). Every answer is logged to `query_runs`. | `researchgraph/answer.py` |
 | Per-entity retrieval | Questions naming 2+ methods (for example "RAGAS and ARES") also search for each name separately, using the paper whose title or abstract introduces it, so every side of a comparison has evidence | `Retriever.search_decomposed` |
 | Follow-up questions | After each answer, a second small Qwen3-8B call (≤ 220 output tokens, prompt `followup-v1`) suggests 3 likely next questions: one deeper, one comparison, one on limitations or evaluation. They're based on the question, the answer and the evidence papers' titles. In the app, clicking one asks it and brings new suggestions; a question trail keeps the chain. If the call fails, the answer is still shown. | `answer.suggest_followups`, `app.py` |
+| Agent mode | Hand-rolled **planner → executor → generator → critic** loop. The planner (a Qwen call, JSON) rewrites follow-ups into standalone questions using the session's earlier turns and picks up to 4 tool calls from 4 read-only tools: `search_papers`, `read_paper`, `citation_neighbours`, `paper_info`. The executor runs them in code; the generator is the normal answer call; the critic (code checks + a Qwen review) can ask for one more round with new searches. Caps: 2 rounds, 8 tool calls, 20,000 tokens per task; repeated calls skipped; malformed JSON gets one repair request, then a safe fallback; failing tools are recorded and skipped. Turns persist in SQLite (`agent_turns`). | `researchgraph/agent.py`, `scripts/eval_agent.py` → `reports/AGENT.md` |
+| Tracing | OpenTelemetry spans for every task, plan, tool call, retrieval, rerank and LLM call (with tokens), written to `logs/traces.jsonl` and shown in the app's trace panel; also exported over OTLP if `OTEL_EXPORTER_OTLP_ENDPOINT` is set (Jaeger, Langfuse). `RG_TRACING=0` turns it off. | `researchgraph/tracing.py` |
+| Serving guards | Rate limits (5 questions/min and 40/hour per browser session, 12/min for the whole app) to protect the shared key; SQLite answer cache (7 days, keyed by normalised question + settings; failures never cached); PII scrubbing (emails, phones, card, Aadhaar, PAN, IPs, key-like strings) before anything reaches the model, logs, traces or cache | `researchgraph/guard.py` |
 | Stage evaluation | Scores each step: chunking (length vs the 512-token limit, section detection); retrieval and reranking (recall, passage Hit@10, MRR, nDCG@10, ROUGE-L recall of the reference in the top 10); evidence pack (gold passage/paper in pack, context precision); answer (ROUGE-1/2/L, token F1, bge-small semantic similarity vs reference answers, abstention); grounding (citation validity, ROUGE-L precision of each claim against its cited passages, self-judge); follow-ups (novelty, corpus coverage) | `scripts/eval_stages.py` → `reports/STAGES.md` |
 | API client | Retries 429/503 after 2, 4 and 8 seconds, sends 1 chat request at a time, stays under 60 per minute, checks `max_tokens` and batches embeddings 16 at a time. | `api_client.py`, `api_tests.ipynb` |
 
@@ -63,6 +66,8 @@ BM25, reciprocal rank fusion, personalized PageRank and ROUGE are algorithms, no
 # use it
 .venv/bin/streamlit run app.py --server.address localhost      # http://localhost:8501
 .venv/bin/python scripts/ask.py "How does Self-RAG decide when to retrieve?"   # --mode bm25|dense|hybrid|rerank|graph1hop|graph_ppr
+.venv/bin/python scripts/ask.py "How do RAGAS and ARES differ?" --agent --session s1     # agent mode; same --session remembers turns
+docker compose up --build                                                         # container on http://localhost:8501 (mounts data/, secrets/, .env)
 
 # evaluate
 .venv/bin/python scripts/make_synthetic_qa.py --n 150  # synthetic dev/test questions (Qwen, ~8 min)
@@ -73,6 +78,10 @@ BM25, reciprocal rank fusion, personalized PageRank and ROUGE are algorithms, no
 .venv/bin/python scripts/tune_decompose.py             # per-entity retrieval on the comparison tuning set (no LLM)
 .venv/bin/python scripts/make_corpus_report.py         # → reports/CORPUS.md
 .venv/bin/python scripts/eval_stages.py                # stage-by-stage metrics incl. ROUGE (~25 min; --reuse = no LLM calls) → reports/STAGES.md
+.venv/bin/python scripts/eval_agent.py                 # agent vs pipeline: accuracy, completion, tool calls, cost, failure taxonomy → reports/AGENT.md
+.venv/bin/python scripts/compare_prompts.py            # zero-shot vs few-shot vs CoT vs decomposition on the dev sets → reports/PROMPTS.md
+.venv/bin/python scripts/chunking_experiment.py        # small / base / large chunks, retrieval only → reports/CHUNKING.md
+.venv/bin/python scripts/injection_suite.py            # 23 prompt-injection attacks → reports/INJECTION.md
 .venv/bin/python -m pytest -q                          # offline unit tests
 RG_LIVE=1 .venv/bin/python -m pytest -q tests/test_live.py   # live end-to-end + prompt-injection tests (3 API calls)
 
@@ -89,7 +98,7 @@ RG_LIVE=1 .venv/bin/python -m pytest -q tests/test_live.py   # live end-to-end +
 
 | Set | Size | Purpose | Gold labels |
 |---|---|---|---|
-| `questions_v0.jsonl` (curated) | 42: 14 single-paper, 9 comparison, 7 multi-hop, 3 disagreement, 3 metadata, 6 unanswerable | **Main test set** | Gold papers; reference answers and gold passages in `curated_references.jsonl` (drafted by Claude from the gold papers' passages); **team review in `reports/gold_review_sheet.csv`** |
+| `questions_v0.jsonl` (curated) | 62: 22 single-paper, 13 comparison, 10 multi-hop, 3 disagreement, 5 metadata, 9 unanswerable (q43–q62 added 23 Nov) | **Main test set** | Gold papers; reference answers and gold passages in `curated_references.jsonl` (drafted by Claude from the gold papers' passages); **team review in `reports/gold_review_sheet.csv`** |
 | `synthetic_dev.jsonl` | 105 | Tuning | Exact gold passage (question written from it) |
 | `synthetic_test.jsonl` | 45 | Held out, reported once | Exact gold passage |
 | `answer_dev.jsonl` | 28 (12 unanswerable incl. 4 domain-mismatch, 12 synthetic dev, 4 comparisons) | Tuning the answer prompt only | Answerable or not |
@@ -117,13 +126,16 @@ RG_LIVE=1 .venv/bin/python -m pytest -q tests/test_live.py   # live end-to-end +
 ```
 api_client.py          shared Track B client (chat + embeddings)
 api_tests.ipynb        API checklist tests (46/47 pass; thinking-mode warning)
-app.py                 Streamlit UI (Ask with follow-up suggestions · Citation neighbours · Corpus & provenance · Evaluation)
-researchgraph/         package: db, sources, parse, index, retrieve, rerank, answer, llm
+app.py                 Streamlit UI (Ask with agent mode, follow-ups and trace · Citation neighbours · Corpus & provenance · Evaluation)
+researchgraph/         package: db, sources, parse, index, retrieve, rerank, answer, agent, guard, tracing, llm
 scripts/               expand_corpus, ingest, parse_corpus, build_index, ask, make_synthetic_qa,
-                       evaluate, eval_stages, tune_answers, eval_qasper, make_report, record_demo
+                       evaluate, eval_stages, eval_agent, compare_prompts, chunking_experiment, injection_suite,
+                       tune_answers, eval_qasper, make_report, record_demo
+Dockerfile, docker-compose.yml   container (keys, certificates and paper data are mounted, never baked in)
 data/seed_papers*.tsv  corpus seeds, hand-picked and snowballed (committed)
 data/manifests/        dated corpus manifests (committed, metadata only)
 data/eval/             evaluation question sets (committed)
-reports/               RESULTS.md, REPORT.md, DEMO.md, review sheets, raw JSON results
+reports/               REPORT.md, SPEC.md, RESPONSIBLE_AI.md, STAGES.md, AGENT.md, PROMPTS.md, CHUNKING.md,
+                       INJECTION.md, RESULTS.md, DEMO.md, review sheets, raw JSON results
 tests/                 offline unit tests
 ```
