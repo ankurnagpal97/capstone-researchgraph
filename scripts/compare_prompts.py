@@ -121,7 +121,27 @@ def main():
                     f.write(json.dumps(cached[key], default=str) + "\n")
                 print(f"  {q['qid']} {s:9} answerable={a.get('answerable')} {a['latency_s']}s", flush=True)
             rows[s].append(metrics(q, cached[key]["answer"]))
-    keys = ["correct", "decision_correct", "gold_cited", "gold_in_pack", "json_retry", "json_failed", "contradiction_fixed",
+    # CoT answers often nest answerable/evidence_check inside "reasoning" (schema drift). Score the same answers
+    # again after a code repair that lifts the nested fields to the top level (no new LLM calls).
+    rows["CoT + repair"] = []
+    for q in qs:
+        r = cached.get(("CoT", q["qid"]))
+        if r:
+            a = json.loads(json.dumps(r["answer"]))
+            nested = a.get("reasoning")
+            if isinstance(nested, dict):
+                for k in ("answerable", "evidence_check", "short_answer"):
+                    if a.get(k) is None and k in nested:
+                        a[k] = nested[k]
+            a = answer.abstain_guard(a)
+            rows["CoT + repair"].append(metrics(q, a))
+    for s_ in STRATEGIES:
+        for r, q in zip(rows[s_], [q for q in qs if (s_, q["qid"]) in cached]):
+            a = cached[(s_, q["qid"])]["answer"]
+            r["schema_violation"] = float(a.get("answerable") is None and not a.get("error"))
+    for r in rows["CoT + repair"]:
+        r["schema_violation"] = 0.0
+    keys = ["schema_violation", "correct", "decision_correct", "gold_cited", "gold_in_pack", "json_retry", "json_failed", "contradiction_fixed",
             "missing_name_flag", "comparability_fixed", "invalid_citation", "answered_unanswerable", "over_abstained",
             "n_claims", "tokens", "latency_s"]
     rep = {"run_at": time.strftime("%Y-%m-%d %H:%M"), "n_questions": len(qs), "sets": SETS,
@@ -134,7 +154,7 @@ def main():
         rep["strategies"][s]["latency_p50"] = round(float(np.median(lat[s])), 1) if lat[s] else None
     json.dump(rep, open(OUT_JSON, "w"), indent=1, default=str)
     write_md(rep)
-    for s, m in rep["strategies"].items():
+    for s, m in rep["strategies"].items():  # noqa: B007
         print(f"{s:10} correct {m['correct']['mean']}  decision {m['decision_correct']['mean']}  gold cited {m['gold_cited']['mean']}")
     print("Saved", os.path.relpath(OUT_JSON, ROOT), "and", os.path.relpath(OUT_MD, ROOT))
 
@@ -165,7 +185,8 @@ def write_md(rep):
         lines.append(f"| {label} | " + " | ".join(_f(S[n][k]) for n in names) + " |")
     lines.append("| Latency p50 (s) | " + " | ".join(str(S[n]["latency_p50"]) for n in names) + " |")
     lines += ["", "**How Qwen3-8B breaks** (share of questions)", "", head, sep]
-    for label, k in [("Invalid JSON on first try (repaired)", "json_retry"), ("Invalid JSON twice (no answer)", "json_failed"),
+    for label, k in [("JSON valid but 'answerable' missing at top level (schema drift)", "schema_violation"),
+                     ("Invalid JSON on first try (repaired)", "json_retry"), ("Invalid JSON twice (no answer)", "json_failed"),
                      ("Says 'not stated' but marks answerable (code fixed)", "contradiction_fixed"),
                      ("A named method absent from evidence (code flagged)", "missing_name_flag"),
                      ("'Directly comparable' across papers (code fixed)", "comparability_fixed"),
@@ -176,7 +197,9 @@ def write_md(rep):
     lines += ["", "**Correct by question type**", "", "| Type | " + " | ".join(names) + " |", sep]
     for t in sorted({t for s in rep["by_type"].values() for t in s}):
         lines.append(f"| {t} | " + " | ".join(rep["by_type"][n].get(t, "–") for n in names) + " |")
-    lines += ["", "n = 40, so differences under about 0.15 are not established. These are the dev sets used for "
+    lines += ["", "**CoT + repair** re-scores the same CoT answers after code lifts the fields Qwen nested inside "
+              "\"reasoning\" back to the top level (no new calls).", "",
+              "n = 40, so differences under about 0.15 are not established. These are the dev sets used for "
               "earlier prompt tuning, so zero-shot (answer-v3, tuned on them) has a home advantage."]
     open(OUT_MD, "w").write("\n".join(lines) + "\n")
 

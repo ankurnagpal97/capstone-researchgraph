@@ -219,6 +219,20 @@ def eval_numbers() -> str:
         return "The full tables are in the stages report."
 
 
+def agent_numbers() -> str:
+    p = os.path.join(ROOT, "reports", "agent_results.json")
+    if not os.path.exists(p):
+        return ""
+    r = json.load(open(p))
+    try:
+        P, A = r["pipeline"], r["agent"]
+        return (f" End to end, the pipeline is right on {round(100 * P['end_to_end_accuracy']['mean'])} percent of the "
+                f"{P['n']} curated questions and the agent on {round(100 * A['end_to_end_accuracy']['mean'])} percent, a "
+                f"difference within the noise, at about twice the tokens, so the single-call pipeline stays the default.")
+    except (KeyError, TypeError):
+        return ""
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.path.join(ROOT, "reports", "demo", "researchgraph_demo.mp4"))
@@ -230,7 +244,7 @@ def main():
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     tmp = tempfile.mkdtemp(prefix="rg_demo_")
 
-    NARRATION["eval2"] = eval_numbers()
+    NARRATION["eval2"] = eval_numbers() + agent_numbers()
     voice = args.voice or ("en-US-AndrewNeural" if args.tts == "edge" else "Daniel")
     rate = args.rate or ("-5%" if args.tts == "edge" else "175")
     clips = {}
@@ -267,7 +281,7 @@ def main():
 
         def evidence():
             page.get_by_text("Evidence given to the model").scroll_into_view_if_needed()
-            exp = page.locator('[data-testid="stExpander"] summary').first
+            exp = page.locator('[data-testid="stExpander"] summary', has_text="E1 · ").first
             r.highlight(exp, 500)
             exp.click()
             page.wait_for_timeout(600)

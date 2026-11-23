@@ -1,6 +1,6 @@
 # AI ResearchGraph — stage-by-stage evaluation
 
-Run 2026-11-23 20:05 · LLM `Qwen/Qwen3-8B` · embeddings `bge-small-en-v1.5` · reranker `cross-encoder/ms-marco-MiniLM-L-6-v2` · answer prompt `answer-v3` · follow-up prompt `followup-v1`. Means with 95% bootstrap CIs.
+Run 2026-11-23 23:51 · LLM `Qwen/Qwen3-8B` · embeddings `bge-small-en-v1.5` · reranker `cross-encoder/ms-marco-MiniLM-L-6-v2` · answer prompt `answer-v3` · follow-up prompt `followup-v1`. Means with 95% bootstrap CIs.
 
 **Read with care.** Curated reference answers and gold passages (`data/eval/curated_references.jsonl`) were drafted by Claude from the gold papers and still need team review; the gold passages were picked from each gold paper with help from the cross-encoder, so passage-level numbers may slightly favour B3. Synthetic reference answers were written by Qwen3-8B from one passage, so they share its wording. ROUGE counts word overlap: a correct answer phrased differently scores low, so read it with token F1, semantic similarity and the grounding numbers, not alone.
 
@@ -14,17 +14,17 @@ Run 2026-11-23 20:05 · LLM `Qwen/Qwen3-8B` · embeddings `bge-small-en-v1.5` ·
 | Chunks within the 512-token embedding limit | 100.0% |
 | Chunks with a detected section heading | 97.7% |
 
-## curated (n = 42)
+## curated (n = 62)
 
 ### S2–S3 · Retrieval and reranking (top 10)
 
 | Stage | System | Paper Recall@10 | Passage Hit@10 | MRR | nDCG@10 | ROUGE-L recall of reference in top 10 |
 |---|---|---|---|---|---|---|
-| S2 | B0 BM25 | 0.81 [0.71, 0.91] | 0.58 [0.42, 0.75] | 0.37 [0.24, 0.51] | 0.32 [0.21, 0.43] | 0.57 [0.54, 0.61] |
-| S2 | B1 Dense | 0.82 [0.72, 0.92] | 0.53 [0.36, 0.69] | 0.31 [0.19, 0.44] | 0.26 [0.16, 0.37] | 0.57 [0.53, 0.61] |
-| S2 | B2 Hybrid | 0.86 [0.77, 0.94] | 0.64 [0.47, 0.78] | 0.43 [0.30, 0.56] | 0.34 [0.25, 0.45] | 0.58 [0.54, 0.62] |
-| S3 | B3 Hybrid+rerank | 0.85 [0.76, 0.93] | 0.89 [0.78, 0.97] | 0.64 [0.52, 0.77] | 0.55 [0.44, 0.65] | 0.58 [0.55, 0.61] |
-| S3 | B3 + per-entity (app default) | 0.85 [0.77, 0.93] | 0.89 [0.78, 0.97] | 0.69 [0.56, 0.81] | 0.57 [0.47, 0.67] | 0.59 [0.55, 0.62] |
+| S2 | B0 BM25 | 0.84 [0.76, 0.92] | 0.56 [0.42, 0.69] | 0.34 [0.23, 0.45] | 0.29 [0.20, 0.39] | 0.57 [0.54, 0.60] |
+| S2 | B1 Dense | 0.86 [0.78, 0.93] | 0.48 [0.35, 0.61] | 0.30 [0.20, 0.41] | 0.25 [0.17, 0.35] | 0.57 [0.54, 0.60] |
+| S2 | B2 Hybrid | 0.89 [0.82, 0.94] | 0.61 [0.48, 0.75] | 0.39 [0.28, 0.49] | 0.32 [0.24, 0.41] | 0.58 [0.55, 0.60] |
+| S3 | B3 Hybrid+rerank | 0.89 [0.82, 0.95] | 0.79 [0.67, 0.90] | 0.57 [0.46, 0.68] | 0.48 [0.40, 0.58] | 0.57 [0.54, 0.60] |
+| S3 | B3 + per-entity (app default) | 0.89 [0.83, 0.95] | 0.79 [0.67, 0.90] | 0.60 [0.49, 0.71] | 0.50 [0.42, 0.60] | 0.58 [0.55, 0.61] |
 
 MRR and nDCG use gold passages where the question has them, else gold papers.
 
@@ -32,24 +32,24 @@ MRR and nDCG use gold passages where the question has them, else gold papers.
 
 | Stage | Measure | Value |
 |---|---|---|
-| S4 Evidence pack | Gold paper in pack (recall) | 0.84 [0.74, 0.92] |
-| S4 Evidence pack | Gold passage in pack | 0.86 [0.75, 0.97] |
-| S4 Evidence pack | Context precision (pack passages from gold papers) | 0.58 [0.50, 0.66] |
+| S4 Evidence pack | Gold paper in pack (recall) | 0.88 [0.81, 0.94] |
+| S4 Evidence pack | Gold passage in pack | 0.77 [0.65, 0.89] |
+| S4 Evidence pack | Context precision (pack passages from gold papers) | 0.58 [0.52, 0.64] |
 | S4 Evidence pack | ROUGE-L recall of reference in pack (upper bound for the answer) | 0.57 [0.54, 0.60] |
-| S5 Answer | ROUGE-1 F1 | 0.37 [0.34, 0.39] |
-| S5 Answer | ROUGE-2 F1 | 0.13 [0.11, 0.15] |
-| S5 Answer | ROUGE-L F1 (full answer / short answer only) | 0.25 [0.23, 0.27] / 0.29 [0.26, 0.31] |
-| S5 Answer | ROUGE-L recall | 0.39 [0.35, 0.43] |
-| S5 Answer | Token F1 (SQuAD-style) | 0.30 [0.28, 0.33] |
-| S5 Answer | Semantic similarity to reference (bge-small cosine) | 0.89 [0.88, 0.90] |
-| S5 Answer | Mean answer length (words) | 112.94 [101.08, 124.94] |
-| S5 Answer | Declined unanswerable / answered answerable | 4/6 / 35/36 |
+| S5 Answer | ROUGE-1 F1 | 0.37 [0.35, 0.39] |
+| S5 Answer | ROUGE-2 F1 | 0.14 [0.12, 0.16] |
+| S5 Answer | ROUGE-L F1 (full answer / short answer only) | 0.26 [0.24, 0.28] / 0.30 [0.27, 0.33] |
+| S5 Answer | ROUGE-L recall | 0.38 [0.35, 0.42] |
+| S5 Answer | Token F1 (SQuAD-style) | 0.31 [0.29, 0.34] |
+| S5 Answer | Semantic similarity to reference (bge-small cosine) | 0.89 [0.87, 0.90] |
+| S5 Answer | Mean answer length (words) | 106.40 [97.15, 116.75] |
+| S5 Answer | Declined unanswerable / answered answerable | 7/9 / 52/53 |
 | S6 Grounding | Citation IDs that exist in the evidence | 1.00 [1.00, 1.00] |
-| S6 Grounding | Claim words found in its cited passages (ROUGE-L precision) | 0.80 [0.76, 0.84] |
-| S6 Grounding | Qwen-judged claims supported | 0.929 |
-| S7 Follow-ups | Suggestions generated | 126 |
-| S7 Follow-ups | Novelty vs original question (1 − ROUGE-L) | 0.74 [0.71, 0.76] |
-| S7 Follow-ups | Covered by the corpus (top rerank score ≥ -5.0) | 1.00 [1.00, 1.00] |
+| S6 Grounding | Claim words found in its cited passages (ROUGE-L precision) | 0.78 [0.74, 0.82] |
+| S6 Grounding | Qwen-judged claims supported | 0.911 |
+| S7 Follow-ups | Suggestions generated | 186 |
+| S7 Follow-ups | Novelty vs original question (1 − ROUGE-L) | 0.74 [0.72, 0.76] |
+| S7 Follow-ups | Covered by the corpus (top rerank score ≥ -5.0) | 0.99 [0.98, 1.00] |
 
 <details><summary>Example reference vs answer</summary>
 

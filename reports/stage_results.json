@@ -1,5 +1,5 @@
 {
- "run_at": "2026-11-23 20:05",
+ "run_at": "2026-11-23 23:51",
  "llm": "Qwen/Qwen3-8B",
  "reranker": "cross-encoder/ms-marco-MiniLM-L-6-v2",
  "embeddings": "bge-small-en-v1.5",
@@ -18,323 +18,323 @@
  },
  "sets": {
   "curated": {
-   "n_questions": 42,
+   "n_questions": 62,
    "retrieval": {
     "B0 BM25": {
      "paper_r10": {
-      "mean": 0.812,
+      "mean": 0.844,
       "ci95": [
-       0.713,
-       0.907
+       0.761,
+       0.918
       ],
-      "n": 36
+      "n": 53
      },
      "passage_hit10": {
-      "mean": 0.583,
+      "mean": 0.558,
       "ci95": [
-       0.417,
-       0.75
+       0.423,
+       0.692
       ],
-      "n": 36
+      "n": 52
      },
      "mrr": {
-      "mean": 0.371,
+      "mean": 0.339,
       "ci95": [
-       0.244,
-       0.51
+       0.234,
+       0.448
       ],
-      "n": 36
+      "n": 53
      },
      "ndcg10": {
-      "mean": 0.316,
+      "mean": 0.293,
       "ci95": [
-       0.208,
-       0.435
+       0.203,
+       0.388
       ],
-      "n": 36
-     },
-     "rougeL_recall_top10": {
-      "mean": 0.574,
-      "ci95": [
-       0.537,
-       0.611
-      ],
-      "n": 36
-     }
-    },
-    "B1 Dense": {
-     "paper_r10": {
-      "mean": 0.822,
-      "ci95": [
-       0.718,
-       0.917
-      ],
-      "n": 36
-     },
-     "passage_hit10": {
-      "mean": 0.528,
-      "ci95": [
-       0.361,
-       0.694
-      ],
-      "n": 36
-     },
-     "mrr": {
-      "mean": 0.309,
-      "ci95": [
-       0.192,
-       0.438
-      ],
-      "n": 36
-     },
-     "ndcg10": {
-      "mean": 0.26,
-      "ci95": [
-       0.163,
-       0.37
-      ],
-      "n": 36
+      "n": 53
      },
      "rougeL_recall_top10": {
       "mean": 0.573,
       "ci95": [
-       0.532,
-       0.613
+       0.544,
+       0.603
       ],
-      "n": 36
+      "n": 53
+     }
+    },
+    "B1 Dense": {
+     "paper_r10": {
+      "mean": 0.86,
+      "ci95": [
+       0.783,
+       0.929
+      ],
+      "n": 53
+     },
+     "passage_hit10": {
+      "mean": 0.481,
+      "ci95": [
+       0.346,
+       0.615
+      ],
+      "n": 52
+     },
+     "mrr": {
+      "mean": 0.303,
+      "ci95": [
+       0.199,
+       0.413
+      ],
+      "n": 53
+     },
+     "ndcg10": {
+      "mean": 0.254,
+      "ci95": [
+       0.166,
+       0.347
+      ],
+      "n": 53
+     },
+     "rougeL_recall_top10": {
+      "mean": 0.572,
+      "ci95": [
+       0.542,
+       0.603
+      ],
+      "n": 53
      }
     },
     "B2 Hybrid": {
      "paper_r10": {
-      "mean": 0.861,
+      "mean": 0.887,
       "ci95": [
-       0.773,
-       0.935
+       0.824,
+       0.943
       ],
-      "n": 36
+      "n": 53
      },
      "passage_hit10": {
-      "mean": 0.639,
+      "mean": 0.615,
       "ci95": [
-       0.472,
-       0.778
+       0.481,
+       0.75
       ],
-      "n": 36
+      "n": 52
      },
      "mrr": {
-      "mean": 0.426,
+      "mean": 0.386,
       "ci95": [
-       0.3,
-       0.56
+       0.285,
+       0.486
       ],
-      "n": 36
+      "n": 53
      },
      "ndcg10": {
-      "mean": 0.344,
+      "mean": 0.324,
       "ci95": [
-       0.246,
-       0.448
+       0.239,
+       0.409
       ],
-      "n": 36
+      "n": 53
      },
      "rougeL_recall_top10": {
-      "mean": 0.581,
+      "mean": 0.576,
       "ci95": [
-       0.543,
-       0.619
+       0.547,
+       0.605
       ],
-      "n": 36
+      "n": 53
      }
     },
     "B3 Hybrid+rerank": {
      "paper_r10": {
-      "mean": 0.847,
+      "mean": 0.887,
       "ci95": [
-       0.759,
-       0.926
+       0.824,
+       0.947
       ],
-      "n": 36
+      "n": 53
      },
      "passage_hit10": {
-      "mean": 0.889,
+      "mean": 0.788,
       "ci95": [
-       0.778,
-       0.972
+       0.673,
+       0.904
       ],
-      "n": 36
+      "n": 52
      },
      "mrr": {
-      "mean": 0.644,
+      "mean": 0.566,
       "ci95": [
-       0.519,
-       0.768
+       0.458,
+       0.678
       ],
-      "n": 36
+      "n": 53
      },
      "ndcg10": {
-      "mean": 0.546,
+      "mean": 0.485,
       "ci95": [
-       0.44,
-       0.65
+       0.395,
+       0.581
       ],
-      "n": 36
+      "n": 53
      },
      "rougeL_recall_top10": {
-      "mean": 0.579,
+      "mean": 0.57,
       "ci95": [
-       0.547,
-       0.611
+       0.542,
+       0.599
       ],
-      "n": 36
+      "n": 53
      }
     },
     "B3 + per-entity (app default)": {
      "paper_r10": {
-      "mean": 0.852,
+      "mean": 0.89,
       "ci95": [
-       0.769,
-       0.931
+       0.827,
+       0.947
       ],
-      "n": 36
+      "n": 53
      },
      "passage_hit10": {
-      "mean": 0.889,
+      "mean": 0.788,
       "ci95": [
-       0.778,
-       0.972
+       0.673,
+       0.904
       ],
-      "n": 36
+      "n": 52
      },
      "mrr": {
-      "mean": 0.688,
+      "mean": 0.599,
       "ci95": [
-       0.558,
-       0.806
+       0.492,
+       0.708
       ],
-      "n": 36
+      "n": 53
      },
      "ndcg10": {
-      "mean": 0.567,
+      "mean": 0.504,
       "ci95": [
-       0.465,
-       0.665
+       0.417,
+       0.597
       ],
-      "n": 36
+      "n": 53
      },
      "rougeL_recall_top10": {
-      "mean": 0.587,
+      "mean": 0.582,
       "ci95": [
-       0.554,
-       0.619
+       0.553,
+       0.611
       ],
-      "n": 36
+      "n": 53
      }
     }
    },
    "answers": {
     "pack_gold_paper_recall": {
-     "mean": 0.836,
+     "mean": 0.879,
      "ci95": [
-      0.745,
-      0.921
+      0.811,
+      0.94
      ],
-     "n": 36
+     "n": 53
     },
     "pack_gold_passage_hit": {
-     "mean": 0.861,
+     "mean": 0.769,
      "ci95": [
-      0.75,
-      0.972
+      0.654,
+      0.885
      ],
-     "n": 36
+     "n": 52
     },
     "pack_context_precision": {
-     "mean": 0.577,
+     "mean": 0.578,
      "ci95": [
-      0.499,
-      0.658
+      0.518,
+      0.644
      ],
-     "n": 36
+     "n": 53
     },
     "pack_rougeL_recall": {
-     "mean": 0.571,
+     "mean": 0.568,
      "ci95": [
-      0.537,
-      0.605
+      0.538,
+      0.597
      ],
-     "n": 36
+     "n": 53
     },
     "rouge1_f": {
      "mean": 0.369,
      "ci95": [
-      0.345,
-      0.394
+      0.349,
+      0.388
      ],
-     "n": 36
+     "n": 53
     },
     "rouge2_f": {
-     "mean": 0.128,
+     "mean": 0.138,
      "ci95": [
-      0.112,
-      0.146
+      0.121,
+      0.156
      ],
-     "n": 36
+     "n": 53
     },
     "rougeL_f": {
-     "mean": 0.249,
+     "mean": 0.257,
      "ci95": [
-      0.229,
-      0.269
+      0.239,
+      0.276
      ],
-     "n": 36
+     "n": 53
     },
     "rougeL_r": {
-     "mean": 0.387,
+     "mean": 0.384,
      "ci95": [
-      0.352,
-      0.428
+      0.354,
+      0.417
      ],
-     "n": 36
+     "n": 53
     },
     "short_rougeL_f": {
-     "mean": 0.287,
+     "mean": 0.298,
      "ci95": [
-      0.261,
-      0.314
+      0.274,
+      0.325
      ],
-     "n": 36
+     "n": 53
     },
     "token_f1": {
-     "mean": 0.303,
+     "mean": 0.313,
      "ci95": [
-      0.281,
-      0.328
+      0.294,
+      0.335
      ],
-     "n": 36
+     "n": 53
     },
     "semantic_sim": {
-     "mean": 0.892,
+     "mean": 0.887,
      "ci95": [
-      0.88,
-      0.904
+      0.873,
+      0.9
      ],
-     "n": 36
+     "n": 53
     },
     "answer_words": {
-     "mean": 112.944,
+     "mean": 106.396,
      "ci95": [
-      101.083,
-      124.944
+      97.151,
+      116.755
      ],
-     "n": 36
+     "n": 53
     },
     "claim_rougeL_precision_vs_cited": {
-     "mean": 0.804,
+     "mean": 0.783,
      "ci95": [
-      0.758,
-      0.845
+      0.742,
+      0.82
      ],
-     "n": 42
+     "n": 61
     },
     "citation_validity": {
      "mean": 1.0,
@@ -342,28 +342,28 @@
       1.0,
       1.0
      ],
-     "n": 42
+     "n": 61
     },
     "followup_novelty": {
-     "mean": 0.738,
+     "mean": 0.737,
      "ci95": [
-      0.712,
-      0.761
+      0.717,
+      0.757
      ],
-     "n": 42
+     "n": 62
     },
     "followup_covered": {
-     "mean": 1.0,
+     "mean": 0.995,
      "ci95": [
-      1.0,
+      0.984,
       1.0
      ],
-     "n": 42
+     "n": 62
     },
-    "abstention": "4/6",
-    "answered_when_answerable": "35/36",
-    "judge_supported": 0.929,
-    "n_followups_total": 126
+    "abstention": "7/9",
+    "answered_when_answerable": "52/53",
+    "judge_supported": 0.911,
+    "n_followups_total": 186
    },
    "per_question": [
     {
@@ -1749,6 +1749,646 @@
       "What metrics did RAPTOR use to evaluate its performance on the Natural Questions dataset?",
       "How does RAPTOR's recall@10 compare to HippoRAG on the same test set?",
       "Were there specific scenarios where RAPTOR's recall@10 dropped significantly on Natural Questions?"
+     ]
+    },
+    {
+     "qid": "q43",
+     "type": "single_paper",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 1.0,
+     "pack_context_precision": 0.429,
+     "pack_gold_passage_hit": 1.0,
+     "pack_rougeL_recall": 0.662,
+     "rouge1_f": 0.462,
+     "rouge2_f": 0.294,
+     "rougeL_f": 0.404,
+     "rougeL_r": 0.323,
+     "token_f1": 0.457,
+     "short_rougeL_f": 0.231,
+     "answer_words": 39,
+     "claim_rougeL_precision_vs_cited": 0.958,
+     "citation_validity": 1.0,
+     "n_claims": 2,
+     "judge_labels": [
+      "supported",
+      "supported"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.783,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How does the extractive compressor differ from the abstractive compressor in terms of implementation?",
+      "How does RECOMP's approach compare to the compression methods in the survey on large language models for information retrieval?",
+      "What are the limitations of using these compressors in the context of retrieval-augmented generation?"
+     ],
+     "semantic_sim": 0.932
+    },
+    {
+     "qid": "q44",
+     "type": "single_paper",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 1.0,
+     "pack_context_precision": 0.429,
+     "pack_gold_passage_hit": 0.0,
+     "pack_rougeL_recall": 0.518,
+     "rouge1_f": 0.395,
+     "rouge2_f": 0.097,
+     "rougeL_f": 0.231,
+     "rougeL_r": 0.304,
+     "token_f1": 0.321,
+     "short_rougeL_f": 0.263,
+     "answer_words": 85,
+     "claim_rougeL_precision_vs_cited": 0.808,
+     "citation_validity": 1.0,
+     "n_claims": 3,
+     "judge_labels": [
+      "supported",
+      "supported",
+      "supported"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.56,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How do the three types of reading notes in Chain-of-Note specifically assess document relevance?",
+      "How does Chain-of-Note compare to the filtering mechanisms in Making Retrieval-Augmented Language Models Robust to Irrelevant Context?",
+      "What evaluation metrics were used to measure the effectiveness of Chain-of-Note in filtering irrelevant documents?"
+     ],
+     "semantic_sim": 0.908
+    },
+    {
+     "qid": "q45",
+     "type": "single_paper",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 1.0,
+     "pack_context_precision": 0.429,
+     "pack_gold_passage_hit": 1.0,
+     "pack_rougeL_recall": 0.712,
+     "rouge1_f": 0.397,
+     "rouge2_f": 0.234,
+     "rougeL_f": 0.346,
+     "rougeL_r": 0.519,
+     "token_f1": 0.364,
+     "short_rougeL_f": 0.541,
+     "answer_words": 100,
+     "claim_rougeL_precision_vs_cited": 0.923,
+     "citation_validity": 1.0,
+     "n_claims": 4,
+     "judge_labels": [
+      "supported",
+      "supported",
+      "supported",
+      "supported"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.692,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How do propositions in Dense X Retrieval differ from traditional document-level retrieval units?",
+      "How does the proposition-based retrieval in Dense X Retrieval compare to the document-level approach in RAG?",
+      "What are the limitations of using propositions as retrieval units in Dense X Retrieval?"
+     ],
+     "semantic_sim": 0.954
+    },
+    {
+     "qid": "q46",
+     "type": "single_paper",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 1.0,
+     "pack_context_precision": 1.0,
+     "pack_gold_passage_hit": 1.0,
+     "pack_rougeL_recall": 0.525,
+     "rouge1_f": 0.382,
+     "rouge2_f": 0.105,
+     "rougeL_f": 0.231,
+     "rougeL_r": 0.328,
+     "token_f1": 0.325,
+     "short_rougeL_f": 0.234,
+     "answer_words": 104,
+     "claim_rougeL_precision_vs_cited": 0.712,
+     "citation_validity": 1.0,
+     "n_claims": 3,
+     "judge_labels": [
+      "supported",
+      "supported",
+      "supported"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.592,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How does late chunking affect the model's ability to handle long-range dependencies compared to chunk-then-embed?",
+      "How does late chunking compare to the chunk-then-embed approach in the paper 'Late Chunking: Contextual Chunk Embeddings Using Long-Context Embedding Models'?",
+      "What are the limitations of late chunking in capturing contextual information when dealing with highly overlapping chunks?"
+     ],
+     "semantic_sim": 0.898
+    },
+    {
+     "qid": "q47",
+     "type": "single_paper",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 1.0,
+     "pack_context_precision": 1.0,
+     "pack_gold_passage_hit": 0.0,
+     "pack_rougeL_recall": 0.431,
+     "rouge1_f": 0.299,
+     "rouge2_f": 0.08,
+     "rougeL_f": 0.209,
+     "rougeL_r": 0.323,
+     "token_f1": 0.261,
+     "short_rougeL_f": 0.309,
+     "answer_words": 134,
+     "claim_rougeL_precision_vs_cited": 0.792,
+     "citation_validity": 1.0,
+     "n_claims": 3,
+     "judge_labels": [
+      "supported",
+      "supported",
+      "supported"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.639,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How does LongRAG handle the increased computational cost of retrieving longer documents?",
+      "How does LongRAG's approach compare to traditional RAG methods that use single-document retrieval?",
+      "What are the limitations of using longer retrieval units in LongRAG for different types of tasks?"
+     ],
+     "semantic_sim": 0.904
+    },
+    {
+     "qid": "q48",
+     "type": "single_paper",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 1.0,
+     "pack_context_precision": 1.0,
+     "pack_gold_passage_hit": 1.0,
+     "pack_rougeL_recall": 0.469,
+     "rouge1_f": 0.346,
+     "rouge2_f": 0.122,
+     "rougeL_f": 0.241,
+     "rougeL_r": 0.327,
+     "token_f1": 0.288,
+     "short_rougeL_f": 0.33,
+     "answer_words": 81,
+     "claim_rougeL_precision_vs_cited": 0.833,
+     "citation_validity": 1.0,
+     "n_claims": 2,
+     "judge_labels": [
+      "supported",
+      "supported"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.701,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How does the drafter model ensure the generated draft is relevant to the query?",
+      "How does Speculative RAG compare to traditional RAG in terms of efficiency and accuracy?",
+      "What are the limitations of the verifier model in handling complex or ambiguous queries?"
+     ],
+     "semantic_sim": 0.843
+    },
+    {
+     "qid": "q49",
+     "type": "single_paper",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 1.0,
+     "pack_context_precision": 0.429,
+     "pack_gold_passage_hit": 0.0,
+     "pack_rougeL_recall": 0.4,
+     "rouge1_f": 0.252,
+     "rouge2_f": 0.085,
+     "rougeL_f": 0.224,
+     "rougeL_r": 0.291,
+     "token_f1": 0.177,
+     "short_rougeL_f": 0.2,
+     "answer_words": 87,
+     "claim_rougeL_precision_vs_cited": 0.88,
+     "citation_validity": 1.0,
+     "n_claims": 3,
+     "judge_labels": [
+      "partial",
+      "supported",
+      "supported"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.787,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How does the paper address the issue of hallucination in RAG systems?",
+      "How does the RAGChecker framework compare to the failure points identified in the Seven Failure Points paper?",
+      "What are the limitations of the hybrid approach proposed in Retrieval Augmented Generation or Long-Context LLMs?"
+     ],
+     "semantic_sim": 0.737
+    },
+    {
+     "qid": "q50",
+     "type": "single_paper",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 1.0,
+     "pack_context_precision": 0.429,
+     "pack_gold_passage_hit": 0.0,
+     "pack_rougeL_recall": 0.365,
+     "rouge1_f": 0.275,
+     "rouge2_f": 0.04,
+     "rougeL_f": 0.216,
+     "rougeL_r": 0.212,
+     "token_f1": 0.234,
+     "short_rougeL_f": 0.222,
+     "answer_words": 49,
+     "claim_rougeL_precision_vs_cited": 0.476,
+     "citation_validity": 1.0,
+     "n_claims": 1,
+     "judge_labels": [
+      "partial"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.744,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How does ColPali's vision language model process visual elements of the document compared to FEVER's approach?",
+      "What are the limitations of ColPali's method in handling complex document layouts?",
+      "How does Rankify evaluate the effectiveness of ColPali's retrieval method compared to other RAG approaches?"
+     ],
+     "semantic_sim": 0.84
+    },
+    {
+     "qid": "q51",
+     "type": "comparison",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 1.0,
+     "pack_context_precision": 0.429,
+     "pack_gold_passage_hit": 1.0,
+     "pack_rougeL_recall": 0.603,
+     "rouge1_f": 0.412,
+     "rouge2_f": 0.147,
+     "rougeL_f": 0.275,
+     "rougeL_r": 0.471,
+     "token_f1": 0.355,
+     "short_rougeL_f": 0.342,
+     "answer_words": 151,
+     "claim_rougeL_precision_vs_cited": 0.923,
+     "citation_validity": 1.0,
+     "n_claims": 6,
+     "judge_labels": [
+      "supported",
+      "supported",
+      "supported",
+      "supported",
+      "supported",
+      "supported"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.765,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How does the joint processing in Fusion-in-Decoder affect the model's ability to handle multi-hop reasoning?",
+      "How does RETRO's approach compare to FiD-Light's method for integrating retrieved passages?",
+      "What are the limitations of using top-relevant passage as context in RETRO for complex questions?"
+     ],
+     "semantic_sim": 0.926
+    },
+    {
+     "qid": "q52",
+     "type": "comparison",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 1.0,
+     "pack_context_precision": 0.571,
+     "pack_gold_passage_hit": 1.0,
+     "pack_rougeL_recall": 0.651,
+     "rouge1_f": 0.394,
+     "rouge2_f": 0.171,
+     "rougeL_f": 0.272,
+     "rougeL_r": 0.46,
+     "token_f1": 0.308,
+     "short_rougeL_f": 0.349,
+     "answer_words": 138,
+     "claim_rougeL_precision_vs_cited": 0.708,
+     "citation_validity": 1.0,
+     "n_claims": 4,
+     "judge_labels": [
+      "supported",
+      "supported",
+      "supported",
+      "supported"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.722,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How does Query2doc's few-shot prompting differ from GAR's context generation approach?",
+      "How does GAR compare to GraphRAG in terms of query expansion and retrieval performance?",
+      "What are the limitations of Query2doc and GAR when handling ambiguous or complex queries?"
+     ],
+     "semantic_sim": 0.909
+    },
+    {
+     "qid": "q53",
+     "type": "comparison",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 1.0,
+     "pack_context_precision": 0.714,
+     "pack_gold_passage_hit": 1.0,
+     "pack_rougeL_recall": 0.569,
+     "rouge1_f": 0.349,
+     "rouge2_f": 0.141,
+     "rougeL_f": 0.244,
+     "rougeL_r": 0.362,
+     "token_f1": 0.321,
+     "short_rougeL_f": 0.276,
+     "answer_words": 108,
+     "claim_rougeL_precision_vs_cited": 0.664,
+     "citation_validity": 1.0,
+     "n_claims": 4,
+     "judge_labels": [
+      "supported",
+      "supported",
+      "supported",
+      "supported"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.735,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How does RAGChecker's claim-level checking mechanism compare to RGB's noise robustness evaluation?",
+      "What are the key differences in evaluation metrics between RAGChecker and RGB?",
+      "In what scenarios might RAGChecker fail to detect errors that RGB captures?"
+     ],
+     "semantic_sim": 0.935
+    },
+    {
+     "qid": "q54",
+     "type": "comparison",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 1.0,
+     "pack_context_precision": 0.571,
+     "pack_gold_passage_hit": 0.0,
+     "pack_rougeL_recall": 0.429,
+     "rouge1_f": 0.299,
+     "rouge2_f": 0.104,
+     "rougeL_f": 0.196,
+     "rougeL_r": 0.302,
+     "token_f1": 0.289,
+     "short_rougeL_f": 0.26,
+     "answer_words": 123,
+     "claim_rougeL_precision_vs_cited": 0.631,
+     "citation_validity": 1.0,
+     "n_claims": 4,
+     "judge_labels": [
+      "supported",
+      "supported",
+      "supported",
+      "supported"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.738,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How does MuSiQue's pipeline ensure the generated multi-hop questions are challenging?",
+      "How does the question composition in MuSiQue compare to the methods in HotpotQA?",
+      "What evaluation metrics were used to assess the difficulty of multi-hop questions in MuSiQue versus HotpotQA?"
+     ],
+     "semantic_sim": 0.93
+    },
+    {
+     "qid": "q55",
+     "type": "multihop",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 1.0,
+     "pack_context_precision": 0.714,
+     "pack_gold_passage_hit": 1.0,
+     "pack_rougeL_recall": 0.646,
+     "rouge1_f": 0.496,
+     "rouge2_f": 0.245,
+     "rougeL_f": 0.312,
+     "rougeL_r": 0.338,
+     "token_f1": 0.452,
+     "short_rougeL_f": 0.231,
+     "answer_words": 72,
+     "claim_rougeL_precision_vs_cited": 0.654,
+     "citation_validity": 1.0,
+     "n_claims": 2,
+     "judge_labels": [
+      "supported",
+      "partial"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.84,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How does Atlas specifically use cross-attention scores from the reader to train the retriever?",
+      "How does the approach in Atlas compare to the method in Distilling Knowledge from Reader to Retriever?",
+      "What limitations does the Atlas approach have in terms of evaluation or specific failure cases?"
+     ],
+     "semantic_sim": 0.867
+    },
+    {
+     "qid": "q56",
+     "type": "multihop",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 0.5,
+     "pack_context_precision": 0.429,
+     "pack_gold_passage_hit": 0.0,
+     "pack_rougeL_recall": 0.509,
+     "rouge1_f": 0.275,
+     "rouge2_f": 0.096,
+     "rougeL_f": 0.18,
+     "rougeL_r": 0.309,
+     "token_f1": 0.279,
+     "short_rougeL_f": 0.214,
+     "answer_words": 126,
+     "claim_rougeL_precision_vs_cited": 0.858,
+     "citation_validity": 1.0,
+     "n_claims": 3,
+     "judge_labels": [
+      "partial",
+      "supported",
+      "not_supported"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.731,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How does reducing the number of input passages affect the accuracy of FiD-Light compared to the baseline?",
+      "What are the differences between FiD-Light's T5 backbone size changes and those in Atlas?",
+      "Does FiD-Light's approach to varying vector numbers lead to any trade-offs in robustness as discussed in the survey?"
+     ],
+     "semantic_sim": 0.861
+    },
+    {
+     "qid": "q57",
+     "type": "multihop",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 1.0,
+     "pack_context_precision": 0.571,
+     "pack_gold_passage_hit": 0.0,
+     "pack_rougeL_recall": 0.556,
+     "rouge1_f": 0.426,
+     "rouge2_f": 0.201,
+     "rougeL_f": 0.383,
+     "rougeL_r": 0.429,
+     "token_f1": 0.388,
+     "short_rougeL_f": 0.471,
+     "answer_words": 70,
+     "claim_rougeL_precision_vs_cited": 0.766,
+     "citation_validity": 1.0,
+     "n_claims": 2,
+     "judge_labels": [
+      "supported",
+      "partial"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.852,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How does the reranking component in Re2G improve performance on KILT compared to other retrieval methods?",
+      "How does SEAL's approach compare to Chain-of-Retrieval in handling knowledge-intensive tasks on KILT?",
+      "What limitations do Re2G and SEAL face when dealing with out-of-domain or ambiguous queries in KILT?"
+     ],
+     "semantic_sim": 0.899
+    },
+    {
+     "qid": "q58",
+     "type": "metadata",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 1.0,
+     "pack_context_precision": 0.286,
+     "pack_rougeL_recall": 0.667,
+     "rouge1_f": 0.426,
+     "rouge2_f": 0.34,
+     "rougeL_f": 0.389,
+     "rougeL_r": 0.778,
+     "token_f1": 0.455,
+     "short_rougeL_f": 0.645,
+     "answer_words": 81,
+     "claim_rougeL_precision_vs_cited": 0.362,
+     "citation_validity": 1.0,
+     "n_claims": 2,
+     "judge_labels": [
+      "not_supported",
+      "partial"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.894,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How does LevelRAG address the failure points identified in Seven Failure Points?",
+      "What are the key differences between ArchRAG and traditional RAG approaches?",
+      "Which paper evaluates the robustness of RAG systems against irrelevant context?"
+     ],
+     "semantic_sim": 0.662
+    },
+    {
+     "qid": "q59",
+     "type": "metadata",
+     "expected_answerable": true,
+     "model_answerable": true,
+     "pack_gold_paper_recall": 1.0,
+     "pack_context_precision": 0.429,
+     "pack_gold_passage_hit": 1.0,
+     "pack_rougeL_recall": 0.84,
+     "rouge1_f": 0.36,
+     "rouge2_f": 0.167,
+     "rougeL_f": 0.32,
+     "rougeL_r": 0.32,
+     "token_f1": 0.383,
+     "short_rougeL_f": 0.343,
+     "answer_words": 25,
+     "claim_rougeL_precision_vs_cited": 0.938,
+     "citation_validity": 1.0,
+     "n_claims": 2,
+     "judge_labels": [
+      "supported",
+      "supported"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.748,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How does BEIR handle varying retrieval task complexities across its 9 tasks?",
+      "How does BEIR compare to other benchmarks like MSMARCO in terms of dataset diversity?",
+      "What are the limitations of BEIR in evaluating zero-shot retrieval performance?"
+     ],
+     "semantic_sim": 0.869
+    },
+    {
+     "qid": "q60",
+     "type": "unanswerable",
+     "expected_answerable": false,
+     "model_answerable": false,
+     "claim_rougeL_precision_vs_cited": 0.705,
+     "citation_validity": 1.0,
+     "n_claims": 4,
+     "judge_labels": [
+      "supported",
+      "supported",
+      "supported",
+      "supported"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.854,
+     "followup_covered": 1.0,
+     "_followups": [
+      "How does RAGChecker evaluate the reliability of retrieved information in legal contexts?",
+      "What are the key differences between Modular RAG and Vendi-RAG in handling legal queries?",
+      "How do ARES and RAGChecker compare in assessing the performance of RAG systems in real-world applications?"
+     ]
+    },
+    {
+     "qid": "q61",
+     "type": "unanswerable",
+     "expected_answerable": false,
+     "model_answerable": false,
+     "claim_rougeL_precision_vs_cited": 0.403,
+     "citation_validity": 1.0,
+     "n_claims": 4,
+     "judge_labels": [
+      "supported",
+      "supported",
+      "supported",
+      "supported"
+     ],
+     "n_followups": 3,
+     "followup_novelty": 0.634,
+     "followup_covered": 1.0,
+     "_followups": [
+      "What are the key differences in retrieval mechanisms between GPT-5 and Qwen3-8B in RAG systems?",
+      "How do the performance metrics of GPT-5 and Qwen3-8B compare in other RAG benchmarks like LongRAG?",
+      "Are there any studies that evaluate the limitations of GPT-5 and Qwen3-8B in knowledge-intensive tasks?"
+     ]
+    },
+    {
+     "qid": "q62",
+     "type": "unanswerable",
+     "expected_answerable": false,
+     "model_answerable": false,
+     "claim_rougeL_precision_vs_cited": null,
+     "citation_validity": null,
+     "n_claims": 0,
+     "judge_labels": [],
+     "n_followups": 3,
+     "followup_novelty": 0.704,
+     "followup_covered": 0.667,
+     "_followups": [
+      "How does ColPali's efficiency compare to other document retrieval models in terms of computational resources?",
+      "Are there any related papers that evaluate the cost-effectiveness of ColPali in large-scale deployments?",
+      "What are the main factors contributing to the cloud cost of running ColPali at scale, if any?"
      ]
     }
    ],

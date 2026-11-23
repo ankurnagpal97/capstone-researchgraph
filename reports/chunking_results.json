@@ -1,0 +1,841 @@
+{
+ "run_at": "2026-11-23 23:07",
+ "budget_tokens": 3000,
+ "variants": {
+  "small": {
+   "target_tokens": 150,
+   "overlap_tokens": 25,
+   "max_chars": 800,
+   "chunks": 18071,
+   "tokens_p50": 145,
+   "tokens_p95": 223,
+   "sets": {
+    "curated": {
+     "B2 Hybrid": {
+      "n_10": {
+       "mean": 9.694,
+       "ci95": [
+        9.194,
+        10.0
+       ],
+       "n": 36
+      },
+      "n_budget": {
+       "mean": 13.556,
+       "ci95": [
+        12.583,
+        14.278
+       ],
+       "n": 36
+      },
+      "paper_recall@10": {
+       "mean": 0.868,
+       "ci95": [
+        0.787,
+        0.944
+       ],
+       "n": 36
+      },
+      "paper_recall@budget": {
+       "mean": 0.891,
+       "ci95": [
+        0.81,
+        0.963
+       ],
+       "n": 36
+      },
+      "passage_found@10": {
+       "mean": 0.444,
+       "ci95": [
+        0.278,
+        0.611
+       ],
+       "n": 36
+      },
+      "passage_found@budget": {
+       "mean": 0.444,
+       "ci95": [
+        0.278,
+        0.611
+       ],
+       "n": 36
+      },
+      "ref_rougeL_recall@10": {
+       "mean": 0.518,
+       "ci95": [
+        0.484,
+        0.551
+       ],
+       "n": 36
+      },
+      "ref_rougeL_recall@budget": {
+       "mean": 0.559,
+       "ci95": [
+        0.523,
+        0.596
+       ],
+       "n": 36
+      }
+     },
+     "B3 Hybrid+rerank": {
+      "n_10": {
+       "mean": 8.194,
+       "ci95": [
+        7.333,
+        8.972
+       ],
+       "n": 36
+      },
+      "n_budget": {
+       "mean": 10.194,
+       "ci95": [
+        8.806,
+        11.5
+       ],
+       "n": 36
+      },
+      "paper_recall@10": {
+       "mean": 0.847,
+       "ci95": [
+        0.759,
+        0.926
+       ],
+       "n": 36
+      },
+      "paper_recall@budget": {
+       "mean": 0.875,
+       "ci95": [
+        0.792,
+        0.949
+       ],
+       "n": 36
+      },
+      "passage_found@10": {
+       "mean": 0.722,
+       "ci95": [
+        0.583,
+        0.861
+       ],
+       "n": 36
+      },
+      "passage_found@budget": {
+       "mean": 0.722,
+       "ci95": [
+        0.583,
+        0.861
+       ],
+       "n": 36
+      },
+      "ref_rougeL_recall@10": {
+       "mean": 0.517,
+       "ci95": [
+        0.483,
+        0.552
+       ],
+       "n": 36
+      },
+      "ref_rougeL_recall@budget": {
+       "mean": 0.539,
+       "ci95": [
+        0.501,
+        0.576
+       ],
+       "n": 36
+      }
+     }
+    },
+    "synthetic_test": {
+     "B2 Hybrid": {
+      "n_10": {
+       "mean": 9.889,
+       "ci95": [
+        9.667,
+        10.0
+       ],
+       "n": 45
+      },
+      "n_budget": {
+       "mean": 13.889,
+       "ci95": [
+        13.356,
+        14.333
+       ],
+       "n": 45
+      },
+      "paper_recall@10": {
+       "mean": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ],
+       "n": 45
+      },
+      "paper_recall@budget": {
+       "mean": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ],
+       "n": 45
+      },
+      "passage_found@10": {
+       "mean": 0.511,
+       "ci95": [
+        0.356,
+        0.644
+       ],
+       "n": 45
+      },
+      "passage_found@budget": {
+       "mean": 0.511,
+       "ci95": [
+        0.356,
+        0.644
+       ],
+       "n": 45
+      },
+      "ref_rougeL_recall@10": {
+       "mean": 0.754,
+       "ci95": [
+        0.698,
+        0.812
+       ],
+       "n": 45
+      },
+      "ref_rougeL_recall@budget": {
+       "mean": 0.782,
+       "ci95": [
+        0.732,
+        0.835
+       ],
+       "n": 45
+      }
+     },
+     "B3 Hybrid+rerank": {
+      "n_10": {
+       "mean": 8.822,
+       "ci95": [
+        8.133,
+        9.489
+       ],
+       "n": 45
+      },
+      "n_budget": {
+       "mean": 11.667,
+       "ci95": [
+        10.489,
+        12.822
+       ],
+       "n": 45
+      },
+      "paper_recall@10": {
+       "mean": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ],
+       "n": 45
+      },
+      "paper_recall@budget": {
+       "mean": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ],
+       "n": 45
+      },
+      "passage_found@10": {
+       "mean": 0.533,
+       "ci95": [
+        0.4,
+        0.667
+       ],
+       "n": 45
+      },
+      "passage_found@budget": {
+       "mean": 0.533,
+       "ci95": [
+        0.4,
+        0.667
+       ],
+       "n": 45
+      },
+      "ref_rougeL_recall@10": {
+       "mean": 0.758,
+       "ci95": [
+        0.707,
+        0.812
+       ],
+       "n": 45
+      },
+      "ref_rougeL_recall@budget": {
+       "mean": 0.775,
+       "ci95": [
+        0.725,
+        0.826
+       ],
+       "n": 45
+      }
+     }
+    }
+   }
+  },
+  "base": {
+   "target_tokens": 300,
+   "overlap_tokens": 50,
+   "max_chars": 1500,
+   "chunks": 11148,
+   "tokens_p50": 252,
+   "tokens_p95": 414,
+   "sets": {
+    "curated": {
+     "B2 Hybrid": {
+      "n_10": {
+       "mean": 9.944,
+       "ci95": [
+        9.833,
+        10.0
+       ],
+       "n": 36
+      },
+      "n_budget": {
+       "mean": 9.611,
+       "ci95": [
+        9.139,
+        10.083
+       ],
+       "n": 36
+      },
+      "paper_recall@10": {
+       "mean": 0.861,
+       "ci95": [
+        0.773,
+        0.935
+       ],
+       "n": 36
+      },
+      "paper_recall@budget": {
+       "mean": 0.843,
+       "ci95": [
+        0.75,
+        0.926
+       ],
+       "n": 36
+      },
+      "passage_found@10": {
+       "mean": 0.639,
+       "ci95": [
+        0.472,
+        0.778
+       ],
+       "n": 36
+      },
+      "passage_found@budget": {
+       "mean": 0.639,
+       "ci95": [
+        0.472,
+        0.778
+       ],
+       "n": 36
+      },
+      "ref_rougeL_recall@10": {
+       "mean": 0.581,
+       "ci95": [
+        0.543,
+        0.619
+       ],
+       "n": 36
+      },
+      "ref_rougeL_recall@budget": {
+       "mean": 0.577,
+       "ci95": [
+        0.541,
+        0.615
+       ],
+       "n": 36
+      }
+     },
+     "B3 Hybrid+rerank": {
+      "n_10": {
+       "mean": 8.25,
+       "ci95": [
+        7.417,
+        9.0
+       ],
+       "n": 36
+      },
+      "n_budget": {
+       "mean": 8.083,
+       "ci95": [
+        7.25,
+        8.833
+       ],
+       "n": 36
+      },
+      "paper_recall@10": {
+       "mean": 0.847,
+       "ci95": [
+        0.759,
+        0.926
+       ],
+       "n": 36
+      },
+      "paper_recall@budget": {
+       "mean": 0.826,
+       "ci95": [
+        0.731,
+        0.912
+       ],
+       "n": 36
+      },
+      "passage_found@10": {
+       "mean": 0.889,
+       "ci95": [
+        0.778,
+        0.972
+       ],
+       "n": 36
+      },
+      "passage_found@budget": {
+       "mean": 0.861,
+       "ci95": [
+        0.75,
+        0.972
+       ],
+       "n": 36
+      },
+      "ref_rougeL_recall@10": {
+       "mean": 0.579,
+       "ci95": [
+        0.547,
+        0.611
+       ],
+       "n": 36
+      },
+      "ref_rougeL_recall@budget": {
+       "mean": 0.578,
+       "ci95": [
+        0.545,
+        0.611
+       ],
+       "n": 36
+      }
+     }
+    },
+    "synthetic_test": {
+     "B2 Hybrid": {
+      "n_10": {
+       "mean": 10.0,
+       "ci95": [
+        10.0,
+        10.0
+       ],
+       "n": 45
+      },
+      "n_budget": {
+       "mean": 9.333,
+       "ci95": [
+        9.0,
+        9.689
+       ],
+       "n": 45
+      },
+      "paper_recall@10": {
+       "mean": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ],
+       "n": 45
+      },
+      "paper_recall@budget": {
+       "mean": 0.978,
+       "ci95": [
+        0.933,
+        1.0
+       ],
+       "n": 45
+      },
+      "passage_found@10": {
+       "mean": 0.844,
+       "ci95": [
+        0.733,
+        0.933
+       ],
+       "n": 45
+      },
+      "passage_found@budget": {
+       "mean": 0.822,
+       "ci95": [
+        0.711,
+        0.933
+       ],
+       "n": 45
+      },
+      "ref_rougeL_recall@10": {
+       "mean": 0.806,
+       "ci95": [
+        0.759,
+        0.853
+       ],
+       "n": 45
+      },
+      "ref_rougeL_recall@budget": {
+       "mean": 0.802,
+       "ci95": [
+        0.755,
+        0.848
+       ],
+       "n": 45
+      }
+     },
+     "B3 Hybrid+rerank": {
+      "n_10": {
+       "mean": 9.022,
+       "ci95": [
+        8.378,
+        9.6
+       ],
+       "n": 45
+      },
+      "n_budget": {
+       "mean": 8.6,
+       "ci95": [
+        7.978,
+        9.178
+       ],
+       "n": 45
+      },
+      "paper_recall@10": {
+       "mean": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ],
+       "n": 45
+      },
+      "paper_recall@budget": {
+       "mean": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ],
+       "n": 45
+      },
+      "passage_found@10": {
+       "mean": 0.867,
+       "ci95": [
+        0.756,
+        0.956
+       ],
+       "n": 45
+      },
+      "passage_found@budget": {
+       "mean": 0.867,
+       "ci95": [
+        0.756,
+        0.956
+       ],
+       "n": 45
+      },
+      "ref_rougeL_recall@10": {
+       "mean": 0.812,
+       "ci95": [
+        0.769,
+        0.856
+       ],
+       "n": 45
+      },
+      "ref_rougeL_recall@budget": {
+       "mean": 0.809,
+       "ci95": [
+        0.764,
+        0.854
+       ],
+       "n": 45
+      }
+     }
+    }
+   }
+  },
+  "large": {
+   "target_tokens": 450,
+   "overlap_tokens": 75,
+   "max_chars": 1900,
+   "chunks": 8406,
+   "tokens_p50": 348,
+   "tokens_p95": 519,
+   "sets": {
+    "curated": {
+     "B2 Hybrid": {
+      "n_10": {
+       "mean": 10.0,
+       "ci95": [
+        10.0,
+        10.0
+       ],
+       "n": 36
+      },
+      "n_budget": {
+       "mean": 7.694,
+       "ci95": [
+        7.333,
+        8.139
+       ],
+       "n": 36
+      },
+      "paper_recall@10": {
+       "mean": 0.882,
+       "ci95": [
+        0.799,
+        0.956
+       ],
+       "n": 36
+      },
+      "paper_recall@budget": {
+       "mean": 0.85,
+       "ci95": [
+        0.762,
+        0.931
+       ],
+       "n": 36
+      },
+      "passage_found@10": {
+       "mean": 0.667,
+       "ci95": [
+        0.5,
+        0.833
+       ],
+       "n": 36
+      },
+      "passage_found@budget": {
+       "mean": 0.667,
+       "ci95": [
+        0.5,
+        0.833
+       ],
+       "n": 36
+      },
+      "ref_rougeL_recall@10": {
+       "mean": 0.621,
+       "ci95": [
+        0.59,
+        0.654
+       ],
+       "n": 36
+      },
+      "ref_rougeL_recall@budget": {
+       "mean": 0.591,
+       "ci95": [
+        0.559,
+        0.628
+       ],
+       "n": 36
+      }
+     },
+     "B3 Hybrid+rerank": {
+      "n_10": {
+       "mean": 8.75,
+       "ci95": [
+        8.028,
+        9.361
+       ],
+       "n": 36
+      },
+      "n_budget": {
+       "mean": 6.889,
+       "ci95": [
+        6.389,
+        7.306
+       ],
+       "n": 36
+      },
+      "paper_recall@10": {
+       "mean": 0.863,
+       "ci95": [
+        0.771,
+        0.944
+       ],
+       "n": 36
+      },
+      "paper_recall@budget": {
+       "mean": 0.803,
+       "ci95": [
+        0.704,
+        0.898
+       ],
+       "n": 36
+      },
+      "passage_found@10": {
+       "mean": 0.833,
+       "ci95": [
+        0.694,
+        0.944
+       ],
+       "n": 36
+      },
+      "passage_found@budget": {
+       "mean": 0.806,
+       "ci95": [
+        0.667,
+        0.917
+       ],
+       "n": 36
+      },
+      "ref_rougeL_recall@10": {
+       "mean": 0.626,
+       "ci95": [
+        0.592,
+        0.661
+       ],
+       "n": 36
+      },
+      "ref_rougeL_recall@budget": {
+       "mean": 0.594,
+       "ci95": [
+        0.56,
+        0.63
+       ],
+       "n": 36
+      }
+     }
+    },
+    "synthetic_test": {
+     "B2 Hybrid": {
+      "n_10": {
+       "mean": 10.0,
+       "ci95": [
+        10.0,
+        10.0
+       ],
+       "n": 45
+      },
+      "n_budget": {
+       "mean": 7.378,
+       "ci95": [
+        7.133,
+        7.644
+       ],
+       "n": 45
+      },
+      "paper_recall@10": {
+       "mean": 0.978,
+       "ci95": [
+        0.933,
+        1.0
+       ],
+       "n": 45
+      },
+      "paper_recall@budget": {
+       "mean": 0.978,
+       "ci95": [
+        0.933,
+        1.0
+       ],
+       "n": 45
+      },
+      "passage_found@10": {
+       "mean": 0.778,
+       "ci95": [
+        0.644,
+        0.889
+       ],
+       "n": 45
+      },
+      "passage_found@budget": {
+       "mean": 0.778,
+       "ci95": [
+        0.644,
+        0.889
+       ],
+       "n": 45
+      },
+      "ref_rougeL_recall@10": {
+       "mean": 0.802,
+       "ci95": [
+        0.755,
+        0.847
+       ],
+       "n": 45
+      },
+      "ref_rougeL_recall@budget": {
+       "mean": 0.783,
+       "ci95": [
+        0.732,
+        0.831
+       ],
+       "n": 45
+      }
+     },
+     "B3 Hybrid+rerank": {
+      "n_10": {
+       "mean": 9.378,
+       "ci95": [
+        8.822,
+        9.822
+       ],
+       "n": 45
+      },
+      "n_budget": {
+       "mean": 6.911,
+       "ci95": [
+        6.578,
+        7.222
+       ],
+       "n": 45
+      },
+      "paper_recall@10": {
+       "mean": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ],
+       "n": 45
+      },
+      "paper_recall@budget": {
+       "mean": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ],
+       "n": 45
+      },
+      "passage_found@10": {
+       "mean": 0.844,
+       "ci95": [
+        0.733,
+        0.933
+       ],
+       "n": 45
+      },
+      "passage_found@budget": {
+       "mean": 0.844,
+       "ci95": [
+        0.733,
+        0.933
+       ],
+       "n": 45
+      },
+      "ref_rougeL_recall@10": {
+       "mean": 0.821,
+       "ci95": [
+        0.78,
+        0.862
+       ],
+       "n": 45
+      },
+      "ref_rougeL_recall@budget": {
+       "mean": 0.807,
+       "ci95": [
+        0.764,
+        0.849
+       ],
+       "n": 45
+      }
+     }
+    }
+   }
+  }
+ },
+ "minutes": 78.9
+}

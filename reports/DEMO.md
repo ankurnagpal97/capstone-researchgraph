@@ -1,6 +1,6 @@
 # Demo script (5 questions, about 6 minutes)
 
-**Recorded version:** `reports/demo/researchgraph_demo.mp4` (narrated, 3 min 36 s, neural voice "Andrew"; regenerate with `scripts/record_demo.py`). It shows Q1, a clicked follow-up suggestion, Q5, the citation neighbours and the stage-by-stage evaluation. The narration text is in `reports/demo/researchgraph_demo_narration.txt`.
+**Recorded version:** `reports/demo/researchgraph_demo.mp4` (narrated, 5 min 36 s, neural voice "Andrew"; regenerate with `scripts/record_demo.py`). It shows Q1, a clicked follow-up suggestion, agent mode on a comparison (tool calls and the critic's retry), a vague follow-up rewritten from session memory ("the second one" → ARES), the OpenTelemetry trace, Q5 declined, the citation neighbours and the stage-by-stage evaluation. The narration text is in `reports/demo/researchgraph_demo_narration.txt`.
 
 **New since the mentor review:** after every answer, the **You might ask next** section shows 3 follow-up questions. Click one to ask it straight away; the question trail shows the chain.
 
