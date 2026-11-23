@@ -234,6 +234,14 @@ with tab_eval:
         with st.expander("Stage-by-stage accuracy: chunking → retrieval → rerank → evidence → answer (ROUGE) → "
                          "citations → follow-ups", expanded=True):
             st.markdown(open(stages).read().split("\n", 1)[1], unsafe_allow_html=True)  # our own report file
+    for fname, title in (("AGENT.md", "Agent vs pipeline: accuracy, task completion, tool calls, cost, latency, failure taxonomy"),
+                         ("PROMPTS.md", "Prompting strategies: zero-shot vs few-shot vs chain-of-thought vs decomposition"),
+                         ("CHUNKING.md", "Chunking experiment: small vs base vs large chunks"),
+                         ("INJECTION.md", "Prompt-injection suite: 23 attacks")):
+        fp = os.path.join(ROOT, "reports", fname)
+        if os.path.exists(fp):
+            with st.expander(title):
+                st.markdown(open(fp).read().split("\n", 1)[1])   # skip the file's own H1
     path = os.path.join(ROOT, "reports", "eval_results.json")
     if not os.path.exists(path):
         st.info("No evaluation yet. Run `.venv/bin/python scripts/evaluate.py --answers`.")
