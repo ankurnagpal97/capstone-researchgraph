@@ -1,11 +1,13 @@
 """Offline unit tests (no API calls). Run: .venv/bin/python -m pytest -q"""
+import math
 import os
 import sys
 
 import numpy as np
+import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from researchgraph import answer, index, parse  # noqa: E402
+from researchgraph import ROOT, answer, index, parse  # noqa: E402
 from researchgraph.retrieve import Hit, Result, Retriever  # noqa: E402
 
 
@@ -256,3 +258,40 @@ def test_abstain_guard_catches_adverb_phrasings():
                  "The evidence does not directly state the cost.", "This is not clearly reported in the passages."):
         assert g({"answerable": True, "short_answer": text})["answerable"] is False, text
     assert g({"answerable": True, "short_answer": "ARES directly compares against RAGAS on six datasets."})["answerable"] is True
+
+
+def test_followups_are_cleaned_and_never_block(monkeypatch):
+    class FakeClient:
+        def __init__(self, content=None, error=None):
+            self.content, self.error = content, error
+
+        def chat(self, messages, **kw):
+            if self.error:
+                raise self.error
+            return {"choices": [{"message": {"content": self.content}}]}
+
+    ans = {"question": "How does Self-RAG retrieve?", "short_answer": "It predicts tokens.", "answerable": True,
+           "evidence": [{"title": "Self-RAG"}, {"title": "Self-RAG"}, {"title": "CRAG"}]}
+    reply = '```json\n{"followups": ["How does Self-RAG compare with CRAG", "how does self-rag retrieve?", ' \
+            '"How does Self-RAG compare with CRAG", "What are Self-RAG\'s limits?", "Extra one?"]}\n```'
+    monkeypatch.setattr(answer, "client", lambda: FakeClient(reply))
+    out = answer.suggest_followups(ans)
+    assert out == ["How does Self-RAG compare with CRAG?", "What are Self-RAG's limits?", "Extra one?"]
+    assert ans["followups"] == out                            # repeat of the question and duplicates dropped, max 3
+
+    monkeypatch.setattr(answer, "client", lambda: FakeClient(error=answer.ApiError(429, "busy", "/chat")))
+    assert answer.suggest_followups(dict(ans)) == []          # API error -> no suggestions, no exception
+    monkeypatch.setattr(answer, "client", lambda: FakeClient("not json"))
+    assert answer.suggest_followups(dict(ans)) == []
+
+
+def test_stage_metrics():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("eval_stages", os.path.join(ROOT, "scripts", "eval_stages.py"))
+    E = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(E)
+    assert E.token_f1("The cat sat", "cat sat down") == 0.8
+    assert E.rouge("a b c d", "a b c d")["rougeL"]["f"] == 1.0
+    hits = [Hit(f"P#{i}", "P" if i == 2 else "Q", "t", 2024, "s", 1, 1, "x", "u", 1.0) for i in range(5)]
+    assert E.ndcg10(hits, {"P#2"}, {"P"}) == pytest.approx(1 / math.log2(4))
+    assert E.ndcg10(hits, set(), {"P"}) == pytest.approx(1 / math.log2(4))

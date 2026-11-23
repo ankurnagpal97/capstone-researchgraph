@@ -219,6 +219,47 @@ def ask(question: str, result: Result, log: bool = True, prompt_version: str = P
     return ans
 
 
+FOLLOWUP_VERSION = "followup-v1"
+FOLLOWUP_MAX_TOKENS = 220
+FOLLOWUP_SYSTEM = """You suggest what a researcher would most likely ask NEXT, after reading an answer about RAG / LLM-retrieval papers.
+Rules:
+1. Suggest exactly 3 follow-up questions, each under 25 words, each a different direction:
+   (a) go deeper into a method, mechanism or result mentioned in the answer,
+   (b) compare it with a related method or paper,
+   (c) ask about limitations, evaluation or when it fails.
+2. Base them on the question, the answer and the listed papers. Name the methods or papers explicitly (no "it", "this method").
+3. Only ask things these research papers could plausibly answer. Never repeat the original question.
+4. If the answer said the papers do not cover the question, suggest nearby questions the papers DO cover.
+Reply with ONLY JSON: {"followups": ["...", "...", "..."]}"""
+
+
+def suggest_followups(ans: dict) -> list[str]:
+    """One small extra Qwen call: 3 likely next questions, grounded in the answer and its evidence papers.
+    Returns [] on any API or parse error so it never blocks the main answer."""
+    titles = list(dict.fromkeys(e["title"] for e in ans.get("evidence", [])))[:7]
+    user = (f"Original question: {ans.get('question', '')}\n"
+            f"Answer: {ans.get('short_answer', '')}\n"
+            f"Answered from the papers: {'yes' if ans.get('answerable') else 'no'}\n"
+            "Papers the evidence came from:\n" + "\n".join(f"- {t}" for t in titles))
+    t0 = time.time()
+    try:
+        r = client().chat([{"role": "system", "content": FOLLOWUP_SYSTEM}, {"role": "user", "content": user}],
+                          max_tokens=FOLLOWUP_MAX_TOKENS, temperature=0.3)
+        items = _parse_json(r["choices"][0]["message"]["content"] or "").get("followups", [])
+    except (ApiError, ValueError, json.JSONDecodeError, KeyError, AttributeError):
+        items = []
+    norm = lambda s: re.sub(r"[^a-z0-9]+", " ", s.lower()).strip()
+    seen, out = {norm(ans.get("question", ""))}, []
+    for q in items:
+        q = str(q).strip()
+        if q and norm(q) not in seen:
+            seen.add(norm(q))
+            out.append(q if q.endswith("?") else q + "?")
+    ans["followups"] = out[:3]
+    ans["followup_latency_s"] = round(time.time() - t0, 2)
+    return ans["followups"]
+
+
 def render_markdown(ans: dict) -> str:
     """Answer text with numbered citations and a source list (used by the CLI and the app)."""
     if ans.get("error") and not ans.get("claims"):

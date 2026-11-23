@@ -18,6 +18,7 @@ if __name__ == "__main__":
     ap.add_argument("--k", type=int, default=10)
     ap.add_argument("--search-only", action="store_true")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--no-followups", action="store_true", help="skip the follow-up question suggestions (one extra LLM call)")
     a = ap.parse_args()
 
     res = Retriever().search_decomposed(a.question, mode=a.mode, k=a.k)
@@ -28,6 +29,12 @@ if __name__ == "__main__":
             print(f"{h.score:.4f} {h.chunk_id:16} {'G' if h.via_graph else ' '} {h.title[:60]} | {h.section[:30]} | p.{h.page_start}")
         sys.exit()
     ans = answer.ask(a.question, res)
+    if not a.no_followups:
+        answer.suggest_followups(ans)
     print(json.dumps({k: v for k, v in ans.items() if k != "evidence"}, indent=1) if a.json else answer.render_markdown(ans))
     print(f"\n({ans['latency_s']}s, {ans['usage'].get('total_tokens')} tokens, mode {a.mode}"
           f"{', graph used' if ans['graph_used'] else ''})")
+    if ans.get("followups") and not a.json:
+        print("\nYou might ask next:")
+        for f in ans["followups"]:
+            print("  →", f)

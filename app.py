@@ -51,35 +51,64 @@ st.caption("Evidence-grounded answers about RAG and LLM-retrieval research (2022
 
 tab_ask, tab_graph, tab_corpus, tab_eval = st.tabs(["Ask", "Citation neighbours", "Corpus & provenance", "Evaluation"])
 
+def _set_example():
+    if st.session_state.get("example"):
+        st.session_state["q"] = st.session_state["example"]
+
+
+def _ask_followup(question: str):
+    st.session_state["q"] = question
+    st.session_state["autorun"] = True
+
+
 with tab_ask:
     c1, c2 = st.columns([3, 1])
     with c2:
         mode = st.selectbox("Retrieval", list(MODE_LABELS), format_func=MODE_LABELS.get)
         k = st.slider("Passages retrieved", 5, 15, 10)
-        example = st.selectbox("Examples", [""] + EXAMPLES)
+        st.selectbox("Examples", [""] + EXAMPLES, key="example", on_change=_set_example)
+        want_followups = st.toggle("Suggest follow-up questions", value=True,
+                                   help="One extra Qwen3-8B call after each answer (about 2-4 s).")
     with c1:
-        q = st.text_area("Question", value=example, height=90,
-                         placeholder="e.g. Which methods decide adaptively when to retrieve?")
+        st.text_area("Question", key="q", height=90,
+                     placeholder="e.g. Which methods decide adaptively when to retrieve?")
+        q = st.session_state.get("q", "")
         go = st.button("Ask", type="primary", disabled=not q.strip())
+    if st.session_state.pop("autorun", False) and q.strip():
+        go = True
     if go:
         try:
             with st.spinner("Retrieving…"):
                 res = retriever().search_decomposed(q.strip(), mode=mode, k=k)
             with st.spinner("Asking Qwen3-8B (one request at a time per group key)…"):
                 ans = answer.ask(q.strip(), res)
+            if want_followups:
+                with st.spinner("Suggesting follow-up questions…"):
+                    answer.suggest_followups(ans)
             st.session_state["last"] = ans
+            trail = st.session_state.setdefault("trail", [])
+            if not trail or trail[-1] != q.strip():
+                trail.append(q.strip())
         except ApiError as e:
             msg = {429: "The group key is busy with another request. Wait a few seconds and try again.",
                    503: "The model server is busy or restarting. Try again shortly."}.get(e.status, str(e))
             st.error(msg)
     ans = st.session_state.get("last")
     if ans:
+        if len(st.session_state.get("trail", [])) > 1:
+            st.caption("Question trail: " + "  →  ".join(st.session_state["trail"][-4:]))
         st.markdown(answer.render_markdown(ans))
         cv = ans.get("citation_validity")
         st.caption(f"{ans['latency_s']}s · {ans['usage'].get('total_tokens', '?')} tokens · mode {ans['mode']}"
                    + (f" · graph added {', '.join(ans['graph_papers'])}" if ans["graph_used"] else "")
                    + (f" · searched separately for {', '.join(ans['entities'])}" if ans.get("entities") else "")
                    + (f" · citation IDs valid {cv:.0%}" if cv is not None else ""))
+        if ans.get("followups"):
+            st.subheader("You might ask next")
+            for i, f in enumerate(ans["followups"]):
+                st.button(f"→ {f}", key=f"fu{i}", on_click=_ask_followup, args=(f,), use_container_width=True)
+            st.caption(f"Suggested by Qwen3-8B from this answer and its source papers ({ans.get('followup_latency_s', '?')}s). "
+                       "Click one to ask it; new suggestions follow each answer.")
         st.subheader("Evidence given to the model")
         for e in ans["evidence"]:
             pages = f"p.{e['page_start']}" if e["page_start"] == e["page_end"] else f"pp.{e['page_start']}–{e['page_end']}"
@@ -131,6 +160,11 @@ with tab_corpus:
                "licence, which lets arXiv distribute the paper but gives no reuse rights to us.")
 
 with tab_eval:
+    stages = os.path.join(ROOT, "reports", "STAGES.md")
+    if os.path.exists(stages):
+        with st.expander("Stage-by-stage accuracy: chunking → retrieval → rerank → evidence → answer (ROUGE) → "
+                         "citations → follow-ups", expanded=True):
+            st.markdown(open(stages).read().split("\n", 1)[1], unsafe_allow_html=True)  # our own report file
     path = os.path.join(ROOT, "reports", "eval_results.json")
     if not os.path.exists(path):
         st.info("No evaluation yet. Run `.venv/bin/python scripts/evaluate.py --answers`.")

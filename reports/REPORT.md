@@ -2,7 +2,8 @@
 
 **IIT Kharagpur Capstone, Track B · Qwen3-8B · November 2026**
 
-> **Status of this report.** Every number below was measured on 14–19 Nov 2026 with the code in this repository.
+> **Status of this report.** Every number below was measured on 14–23 Nov 2026 with the code in this repository.
+> Since the mentor review (22 Nov): reference answers and gold passages for the curated questions, a stage-by-stage evaluation with ROUGE and related metrics (§4.5), and follow-up question suggestions (§4.6). The corpus was deliberately not grown.
 > Two inputs still need the team: **(1)** review of the gold papers for the curated questions (`reports/gold_review_sheet.csv`),
 > **(2)** human citation-support labels (`reports/citation_audit_sample.csv`). Sections that depend on them are marked **[TEAM]**.
 
@@ -36,6 +37,7 @@ flowchart LR
     K --> L[Qwen3-8B<br/>JSON claim ledger]
     L --> A[Abstention guard +<br/>citation audit]
     A --> O[Answer with<br/>passage-level citations]
+    O --> FU[Qwen3-8B<br/>3 follow-up questions]
   end
 ```
 
@@ -50,9 +52,12 @@ flowchart LR
 | Reranker | `cross-encoder/ms-marco-MiniLM-L-6-v2` on CPU (30 pairs in 0.24 s) | Small enough to run locally; the GPU (MPS) ran out of shared memory during long runs |
 | Citation graph | OpenAlex references plus title and ID matches in reference lists (each edge records its source); used only to nominate papers, whose passages must still win reranking | A citation shows a link, not agreement or evidence |
 | Generation | One call per answer; JSON claim ledger in which every claim and comparison cites passage labels; a passage-check field first; survey passages marked as second-hand (prompt v3) | Track B allows 8,192 tokens per request and at most 1,024 output tokens, so there's room for exactly one structured call |
+| Follow-up questions | A second Qwen3-8B call (≤ 220 output tokens) gets the question, short answer and evidence-paper titles and returns 3 next questions: deeper, comparison, limitations/evaluation; de-duplicated; failure never blocks the answer | Mentor request; helps users explore the literature without knowing what to ask next |
 | Safety rails | Citation audit (labels must exist in the evidence pack); abstention guard (an answer that says "not stated" is marked unanswerable); named-thing check (every name in the question must appear in the evidence); comparability check (different papers are never "directly comparable"); retrieved text treated as untrusted (tested with a prompt injection) | Verification happens in code, not just in the prompt |
 
 ## 3. Evaluation design
+
+**Models.** Qwen3-8B (course API, VM06) generates answers, follow-up questions, the self-judge labels and the synthetic questions. bge-small-en-v1.5 (course API, VM02, 384 dimensions) embeds passages and queries. `cross-encoder/ms-marco-MiniLM-L-6-v2` (22M parameters, local CPU) reranks the top 30 candidates. BM25, reciprocal rank fusion, personalized PageRank and ROUGE are algorithms, not trained models.
 
 - **Systems:** B0 BM25 · B1 dense · B2 hybrid · B3 B2 + reranker · B4 B3 + one-hop citation expansion · B5 B3 + personalized PageRank. The corpus, chunks, prompt and model are identical across all six.
 - **Question sets:** a curated test set (42 questions in six types, including 6 unanswerable), synthetic tuning and test sets (105 / 45; Qwen wrote each question from one known passage), an answer-tuning set (20), and the QASPER test set (60 papers, 194 questions with human evidence labels).
@@ -119,6 +124,27 @@ Each fix targets a failure listed in §5. Each was developed on a tuning set, th
 
 60 sampled claims, each with its cited passages, are in `reports/citation_audit_sample.csv`. Label each one *supported / partial / not_supported*, then report: share supported = __ / 60; share partial = __; share not supported = __; agreement with the automatic judge = __%.
 
+### 4.5 Stage-by-stage accuracy (ROUGE and related metrics)
+
+`scripts/eval_stages.py` follows each question through the pipeline and measures what survives each step. Full tables with 95% bootstrap intervals: [STAGES.md](STAGES.md). Curated reference answers (36) and their gold passages are in `data/eval/curated_references.jsonl`; they were drafted from the gold papers' passages and are under team review (`reports/reference_review_sheet.csv`).
+
+| Stage | Measure | Curated (n = 42) | Synthetic test (n = 45) |
+|---|---|---|---|
+| S1 Chunking (whole corpus) | Chunks within the 512-token limit · with a section heading | 100% · 97.7% | (same corpus) |
+| S2 Hybrid (B2) | Gold passage in top 10 · MRR · nDCG@10 | 0.64 · 0.43 · 0.34 | 0.84 · 0.65 · 0.70 |
+| S3 + rerank, per-entity (app default) | Gold passage in top 10 · MRR · nDCG@10 | 0.89 · 0.69 · 0.57 | 0.87 · 0.69 · 0.74 |
+| S4 Evidence pack (≤ 7 passages) | Gold passage in pack · context precision · ROUGE-L recall of reference | 0.86 · 0.58 · 0.57 | 0.87 · 0.42 · 0.81 |
+| S5 Answer | ROUGE-1 / ROUGE-2 / ROUGE-L F1 | 0.37 / 0.13 / 0.25 | 0.32 / 0.22 / 0.28 |
+| S5 Answer | ROUGE-L recall · token F1 · semantic similarity | 0.39 · 0.30 · 0.89 | 0.71 · 0.30 · 0.80 |
+| S6 Grounding | Citation IDs valid · claim words in cited passage (ROUGE-L precision) · self-judged supported | 1.00 · 0.80 · 0.93 | 1.00 · 0.77 · – |
+| S7 Follow-ups | Suggestions · novelty (1 − ROUGE-L vs question) · covered by corpus | 126 · 0.74 · 100% | – |
+
+**Reading it.** (1) The cross-encoder is where the right *passage* is found: on curated questions the gold passage reaches the top 10 for 0.64 → 0.89 of questions. The curated gold passages were picked with help from the cross-encoder, which may favour B3, so the synthetic test set, whose gold passages are independent, is the fairer check: 0.84 → 0.87 and MRR 0.65 → 0.73 for plain B3 (STAGES.md). (2) Little is lost between retrieval and the evidence pack (0.89 → 0.86). (3) ROUGE is modest by design: answers are long (~110 words) and paraphrase the passages, while references are 2–4 sentences. ROUGE-L recall (0.39) is bounded by how much of the reference appears in the evidence at all (0.57), and the embedding similarity (0.89) shows the meaning matches. (4) Grounding is high: 80% of each claim's words appear in the passage it cites, and no citation points outside the evidence. (5) "Covered by the corpus" for follow-ups uses the evidence threshold, a lenient check.
+
+### 4.6 Follow-up questions
+
+After each answer, one extra Qwen3-8B call (about 2 s) suggests three next questions. Example for *"How do RAGAS and ARES differ in how they evaluate RAG systems?"*: "Which evaluation framework, RAGAS or ARES, is more suitable for scenarios with limited human-annotated data?" In the app each suggestion is a button that asks it at once and brings new suggestions, with a question trail. On the 42 curated questions it produced 126 suggestions, all distinct from the original question.
+
 ## 5. Failure analysis
 
 Failures from run 2 (B3, prompt v2), grouped by cause. §4.3 shows which fixes were then built and what they changed. In the final run, the remaining answerability errors are q40 and q41 (unanswerable but answered) and q33 (answerable but declined). Question IDs are in `data/eval/questions_v0.jsonl`; full outputs are in `query_runs`.
@@ -136,7 +162,8 @@ Failures from run 2 (B3, prompt v2), grouped by cause. §4.3 shows which fixes w
 
 ## 6. Limitations
 
-- **The curated gold labels are drafts** until reviewed **[TEAM]**. Passage-level gold labels exist only for the synthetic sets and QASPER.
+- **The curated gold labels and reference answers are drafts** until reviewed **[TEAM]** (`reports/reference_review_sheet.csv`). The reference answers were drafted by an AI assistant (Claude) from the gold passages, and the curated gold passages were chosen with help from the cross-encoder, which may favour B3 on passage-level curated metrics.
+- **ROUGE rewards wording overlap,** so paraphrased but correct answers score low; it is reported next to token F1, embedding similarity and grounding, never alone.
 - **Small curated n:** with 36 answerable questions, a difference under about 0.10 isn't established.
 - **The automatic citation-support judge is Qwen3-8B judging its own answers,** so it's optimistic. Only the human labels count.
 - **PDF parsing is heuristic.** Tables are flattened to text, and 3 papers were flagged for structure checks. Questions about numbers in tables are therefore weaker.

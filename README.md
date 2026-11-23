@@ -4,7 +4,7 @@ Evidence-grounded question answering over **146 research papers on retrieval-aug
 Every claim in an answer cites the exact passage (paper, section, page) it comes from. Results that can't be compared are flagged, and the system says so when the indexed papers don't answer the question.
 A citation graph between papers is available as an optional retrieval step. A citation is never treated as evidence or agreement.
 
-Results: [reports/RESULTS.md](reports/RESULTS.md) · Full write-up: [reports/REPORT.md](reports/REPORT.md) · Demo: [reports/DEMO.md](reports/DEMO.md)
+Results: [reports/RESULTS.md](reports/RESULTS.md) · Stage-by-stage accuracy (ROUGE etc.): [reports/STAGES.md](reports/STAGES.md) · Full write-up: [reports/REPORT.md](reports/REPORT.md) · Demo: [reports/DEMO.md](reports/DEMO.md)
 
 ## Pipeline
 
@@ -26,7 +26,19 @@ seed_papers.tsv ──► expand_corpus.py ──► ingest.py ──► parse_c
 | Retrieval | B0 BM25 · B1 dense · B2 hybrid (RRF, k = 60) · **B3 hybrid + cross-encoder rerank (default)** · B4 B3 + one-hop citation expansion · B5 B3 + personalized PageRank over the citation graph. At most 3 chunks per paper. | `researchgraph/retrieve.py`, `researchgraph/rerank.py` |
 | Answers | One Qwen3-8B call: at most 7 passages / about 3,000 tokens of evidence → JSON claim ledger (≤ 1,024 tokens). Prompt `answer-v3`: check the evidence first, decline on a domain mismatch, attribute claims from passages marked SURVEY, cite each comparison. Code checks: citation audit, abstention guard, and a comparability guard (results from different papers are never "directly comparable"). Every answer is logged to `query_runs`. | `researchgraph/answer.py` |
 | Per-entity retrieval | Questions naming 2+ methods (for example "RAGAS and ARES") also search for each name separately, using the paper whose title or abstract introduces it, so every side of a comparison has evidence | `Retriever.search_decomposed` |
+| Follow-up questions | After each answer, a second small Qwen3-8B call (≤ 220 output tokens, prompt `followup-v1`) suggests 3 likely next questions: one deeper, one comparison, one on limitations or evaluation. They're based on the question, the answer and the evidence papers' titles. In the app, clicking one asks it and brings new suggestions; a question trail keeps the chain. If the call fails, the answer is still shown. | `answer.suggest_followups`, `app.py` |
+| Stage evaluation | Scores each step: chunking (length vs the 512-token limit, section detection); retrieval and reranking (recall, passage Hit@10, MRR, nDCG@10, ROUGE-L recall of the reference in the top 10); evidence pack (gold passage/paper in pack, context precision); answer (ROUGE-1/2/L, token F1, bge-small semantic similarity vs reference answers, abstention); grounding (citation validity, ROUGE-L precision of each claim against its cited passages, self-judge); follow-ups (novelty, corpus coverage) | `scripts/eval_stages.py` → `reports/STAGES.md` |
 | API client | Retries 429/503 after 2, 4 and 8 seconds, sends 1 chat request at a time, stays under 60 per minute, checks `max_tokens` and batches embeddings 16 at a time. | `api_client.py`, `api_tests.ipynb` |
+
+## Models used
+
+| Role | Model | Runs on |
+|---|---|---|
+| Answers, follow-up questions, self-judge, synthetic questions | **Qwen3-8B** (thinking off) | Course API, VM06 |
+| Dense retrieval embeddings, semantic-similarity metric | **bge-small-en-v1.5** (384 dimensions) | Course API, VM02 |
+| Reranker (B3–B5) | **cross-encoder/ms-marco-MiniLM-L-6-v2** (22M parameters; override with `RG_RERANKER`) | Locally, CPU |
+
+BM25, reciprocal rank fusion, personalized PageRank and ROUGE are algorithms, not trained models.
 
 ## Setup
 
@@ -60,8 +72,14 @@ seed_papers.tsv ──► expand_corpus.py ──► ingest.py ──► parse_c
 .venv/bin/python scripts/make_report.py                # → reports/RESULTS.md
 .venv/bin/python scripts/tune_decompose.py             # per-entity retrieval on the comparison tuning set (no LLM)
 .venv/bin/python scripts/make_corpus_report.py         # → reports/CORPUS.md
+.venv/bin/python scripts/eval_stages.py                # stage-by-stage metrics incl. ROUGE (~25 min; --reuse = no LLM calls) → reports/STAGES.md
 .venv/bin/python -m pytest -q                          # offline unit tests
 RG_LIVE=1 .venv/bin/python -m pytest -q tests/test_live.py   # live end-to-end + prompt-injection tests (3 API calls)
+
+# narrated demo video (macOS `say` voice; live answers, so keep the group key free for ~4 min)
+.venv/bin/python -m playwright install chromium
+.venv/bin/streamlit run app.py --server.headless true --client.toolbarMode minimal --server.port 8502 &
+.venv/bin/python scripts/record_demo.py                # → reports/demo/researchgraph_demo.mp4
 ```
 
 **QASPER** (CC BY 4.0) is not committed. Download it with:
@@ -71,7 +89,7 @@ RG_LIVE=1 .venv/bin/python -m pytest -q tests/test_live.py   # live end-to-end +
 
 | Set | Size | Purpose | Gold labels |
 |---|---|---|---|
-| `questions_v0.jsonl` (curated) | 42: 14 single-paper, 9 comparison, 7 multi-hop, 3 disagreement, 3 metadata, 6 unanswerable | **Main test set** | Gold papers drafted from titles; **team review in `reports/gold_review_sheet.csv`** |
+| `questions_v0.jsonl` (curated) | 42: 14 single-paper, 9 comparison, 7 multi-hop, 3 disagreement, 3 metadata, 6 unanswerable | **Main test set** | Gold papers; reference answers and gold passages in `curated_references.jsonl` (drafted by Claude from the gold papers' passages); **team review in `reports/gold_review_sheet.csv`** |
 | `synthetic_dev.jsonl` | 105 | Tuning | Exact gold passage (question written from it) |
 | `synthetic_test.jsonl` | 45 | Held out, reported once | Exact gold passage |
 | `answer_dev.jsonl` | 28 (12 unanswerable incl. 4 domain-mismatch, 12 synthetic dev, 4 comparisons) | Tuning the answer prompt only | Answerable or not |
@@ -99,10 +117,10 @@ RG_LIVE=1 .venv/bin/python -m pytest -q tests/test_live.py   # live end-to-end +
 ```
 api_client.py          shared Track B client (chat + embeddings)
 api_tests.ipynb        API checklist tests (46/47 pass; thinking-mode warning)
-app.py                 Streamlit UI (Ask · Citation neighbours · Corpus & provenance · Evaluation)
+app.py                 Streamlit UI (Ask with follow-up suggestions · Citation neighbours · Corpus & provenance · Evaluation)
 researchgraph/         package: db, sources, parse, index, retrieve, rerank, answer, llm
 scripts/               expand_corpus, ingest, parse_corpus, build_index, ask, make_synthetic_qa,
-                       evaluate, tune_answers, eval_qasper, make_report
+                       evaluate, eval_stages, tune_answers, eval_qasper, make_report, record_demo
 data/seed_papers*.tsv  corpus seeds, hand-picked and snowballed (committed)
 data/manifests/        dated corpus manifests (committed, metadata only)
 data/eval/             evaluation question sets (committed)
