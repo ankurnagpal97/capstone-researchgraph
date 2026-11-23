@@ -10,3 +10,4 @@ torch==2.8.0
 # demo video only (scripts/record_demo.py; then: python -m playwright install chromium)
 playwright==1.60.0
 imageio-ffmpeg==0.6.0
+edge-tts==7.3.1

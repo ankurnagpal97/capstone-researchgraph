@@ -106,7 +106,7 @@ with tab_ask:
         if ans.get("followups"):
             st.subheader("You might ask next")
             for i, f in enumerate(ans["followups"]):
-                st.button(f"→ {f}", key=f"fu{i}", on_click=_ask_followup, args=(f,), use_container_width=True)
+                st.button(f"→ {f}", key=f"fu{i}", on_click=_ask_followup, args=(f,), width="stretch")
             st.caption(f"Suggested by Qwen3-8B from this answer and its source papers ({ans.get('followup_latency_s', '?')}s). "
                        "Click one to ask it; new suggestions follow each answer.")
         st.subheader("Evidence given to the model")
@@ -137,7 +137,7 @@ with tab_graph:
     dot.append("}")
     if len(sub):
         st.graphviz_chart("\n".join(dot))
-    st.dataframe(sub.rename(columns={"sources": "found by"}), hide_index=True, use_container_width=True)
+    st.dataframe(sub.rename(columns={"sources": "found by"}), hide_index=True, width="stretch")
     st.caption(f"{len(df)} citation edges inside the corpus. 'openalex' = OpenAlex reference list; "
                "'pdf_reference_match' = the cited paper's title or arXiv ID appears in the citing paper's reference list.")
 
@@ -150,12 +150,12 @@ with tab_corpus:
     a.metric("Papers indexed", int((p.chunks > 0).sum()))
     b.metric("Chunks", int(p.chunks.sum()))
     c.metric("Citation edges", len(edges_df()))
-    st.dataframe(p, hide_index=True, use_container_width=True,
+    st.dataframe(p, hide_index=True, width="stretch",
                  column_config={"url": st.column_config.LinkColumn("arXiv")})
     d = pd.read_sql_query("SELECT * FROM decisions WHERE decision != 'accept'", con)
     if len(d):
         st.subheader("Rejected or quarantined seeds")
-        st.dataframe(d, hide_index=True, use_container_width=True)
+        st.dataframe(d, hide_index=True, width="stretch")
     st.caption("Full texts are stored locally only and are not redistributed. 'local_index_only' = arXiv's default "
                "licence, which lets arXiv distribute the paper but gives no reuse rights to us.")
 
@@ -182,7 +182,7 @@ with tab_eval:
                 if "passage_hit10" in m:
                     row.update({"passage Hit@10": m["passage_hit10"]["mean"], "passage MRR": m["passage_mrr"]["mean"]})
                 rows.append(row)
-            st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
+            st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
             g = r.get("graph_ablation", {}).get(name)
             if g:
                 st.caption(f"Graph forced on, {g['n']} multi-hop/comparison/disagreement questions")
@@ -192,9 +192,9 @@ with tab_eval:
         if os.path.exists(qp):
             q = json.load(open(qp))
             st.subheader(f"External: {q['dataset']} — {q['n_questions']} questions, {q['n_papers']} papers")
-            st.dataframe(pd.DataFrame(q["summary"]), hide_index=True, use_container_width=True)
+            st.dataframe(pd.DataFrame(q["summary"]), hide_index=True, width="stretch")
         if r.get("answers"):
             a = r["answers"]
             st.subheader(f"Answers: {a['set']}, {a['system']}, n = {a['n']}")
             st.json({k: v for k, v in a.items() if k != "per_question"})
-            st.dataframe(pd.DataFrame(a["per_question"]), hide_index=True, use_container_width=True)
+            st.dataframe(pd.DataFrame(a["per_question"]), hide_index=True, width="stretch")

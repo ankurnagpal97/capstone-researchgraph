@@ -76,7 +76,7 @@ BM25, reciprocal rank fusion, personalized PageRank and ROUGE are algorithms, no
 .venv/bin/python -m pytest -q                          # offline unit tests
 RG_LIVE=1 .venv/bin/python -m pytest -q tests/test_live.py   # live end-to-end + prompt-injection tests (3 API calls)
 
-# narrated demo video (macOS `say` voice; live answers, so keep the group key free for ~4 min)
+# narrated demo video (neural voice via edge-tts, online; `--tts say` = offline macOS voice; live answers, so keep the group key free for ~4 min)
 .venv/bin/python -m playwright install chromium
 .venv/bin/streamlit run app.py --server.headless true --client.toolbarMode minimal --server.port 8502 &
 .venv/bin/python scripts/record_demo.py                # → reports/demo/researchgraph_demo.mp4

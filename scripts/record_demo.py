@@ -1,16 +1,19 @@
 """Record a narrated demo video of the Streamlit app (MP4, 1440x900).
 
-Drives the real app with Playwright (headless Chromium), narrates each scene with the macOS `say` voice,
+Drives the real app with Playwright (headless Chromium), narrates each scene with a neural text-to-speech voice,
 then lays each narration clip at its scene's start time and muxes it onto the screen recording with ffmpeg.
 Answers are generated live, so nobody else should use the group API key while this runs (about 4 minutes).
 
-Needs: pip install playwright imageio-ffmpeg && python -m playwright install chromium   (macOS for `say`)
+Needs: pip install playwright imageio-ffmpeg edge-tts && python -m playwright install chromium
+Voice: Microsoft neural "en-US-AndrewNeural" via edge-tts (online: only the narration text is sent);
+       --tts say uses the built-in macOS voice instead (offline).
 Usage:  .venv/bin/streamlit run app.py --server.headless true --client.toolbarMode minimal --server.port 8502   (port 8502)
         .venv/bin/python scripts/record_demo.py [--out reports/demo/researchgraph_demo.mp4] [--voice Samantha]
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -28,6 +31,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
 W, H = 1440, 900
 APP = "http://localhost:8502"
+TTS_CACHE = os.path.join(os.path.expanduser("~"), ".cache", "researchgraph_tts")
 Q_SINGLE = "How does Self-RAG use reflection tokens to decide when to retrieve and to critique its own generations?"
 Q_ABSTAIN = "Which RAG method has the lowest carbon footprint per query?"
 LLM_TIMEOUT = 150_000
@@ -43,10 +47,35 @@ def card(eyebrow, title, sub):
     return CARD.format(w=W, h=H, bg="#14213D", fg="#F6F4EE", muted="#C9D3E3", eyebrow=eyebrow, title=title, sub=sub)
 
 
-def speak(text: str, path: str, voice: str, rate: int) -> float:
-    aiff = path.replace(".wav", ".aiff")
-    subprocess.run(["say", "-v", voice, "-r", str(rate), "-o", aiff, text], check=True)
-    subprocess.run([FFMPEG, "-y", "-loglevel", "error", "-i", aiff, "-ar", "44100", "-ac", "1", path], check=True)
+def speak(text: str, path: str, tts: str, voice: str, rate: str) -> float:
+    """Narrate `text` into a mono 44.1 kHz WAV and return its length in seconds.
+    tts="edge": Microsoft neural voice via edge-tts (online; only the narration text is sent).
+    tts="say":  the built-in macOS voice (offline fallback)."""
+    raw = path.replace(".wav", ".mp3" if tts == "edge" else ".aiff")
+    if tts == "edge":
+        # The free endpoint throttles bursts ("No audio was received"), so: cache finished clips by
+        # (voice, rate, text), pause between requests, and back off 5/10/20/40/60 s on failure.
+        key = hashlib.sha1(f"{voice}|{rate}|{text}".encode()).hexdigest()[:16]
+        cached = os.path.join(TTS_CACHE, f"{key}.mp3")
+        if not (os.path.exists(cached) and os.path.getsize(cached) > 0):
+            os.makedirs(TTS_CACHE, exist_ok=True)
+            exe = os.path.join(os.path.dirname(sys.executable), "edge-tts")
+            for wait in (5, 10, 20, 40, 60, None):
+                r = subprocess.run([exe, "--voice", voice, f"--rate={rate}", "--text", text, "--write-media", cached],
+                                   capture_output=True)
+                if r.returncode == 0 and os.path.getsize(cached) > 0:
+                    break
+                if wait is None:
+                    os.remove(cached) if os.path.exists(cached) else None
+                    raise RuntimeError(f"edge-tts failed: {r.stderr.decode()[-300:]}")
+                print(f"  voice service busy, retrying in {wait}s")
+                time.sleep(wait)
+            time.sleep(2)
+        shutil.copy(cached, raw)
+    else:
+        subprocess.run(["say", "-v", voice, "-r", rate, "-o", raw, text], check=True)
+    subprocess.run([FFMPEG, "-y", "-loglevel", "error", "-i", raw, "-af", "apad=pad_dur=0.25",
+                    "-ar", "44100", "-ac", "1", path], check=True)
     with wave.open(path) as w:
         return w.getnframes() / w.getframerate()
 
@@ -125,16 +154,16 @@ class Recorder:
 
 
 NARRATION = {
-    "intro": "A I ResearchGraph. An evidence-grounded question answering system over one hundred and forty-six research "
-             "papers on retrieval-augmented generation, built for the I I T Kharagpur capstone, track B, with Kwen 3, 8 B.",
-    "app": "This is the app. On the right you choose the retrieval system. The default, B 3, is hybrid B M 25 plus "
-           "embedding search, reranked by the M S Marco Mini L M cross-encoder. Answers come from a single Kwen 3 call "
+    "intro": "AI ResearchGraph. An evidence-grounded question answering system over one hundred and forty-six research "
+             "papers on retrieval-augmented generation, built for the IIT Kharagpur capstone, track B, with Kwen 3, 8 B.",
+    "app": "This is the app. On the right you choose the retrieval system. The default, B3, is hybrid BM25 plus "
+           "embedding search, reranked by the MS MARCO MiniLM cross-encoder. Answers come from a single Kwen 3 call "
            "that may use only passages from the indexed papers.",
     "ask1": "First, a single-paper question: how does Self-RAG use reflection tokens? The system retrieves and reranks "
             "passages, packs at most seven of them, and asks Kwen for a JSON list of claims, each citing the passages "
             "that support it. Code then checks every citation.",
     "answer1": "Every claim carries numbered citations, and the source list gives the paper, the section, the page and "
-               "the chunk I D.",
+               "the chunk ID.",
     "evidence": "Each evidence card shows the exact passage the model was given, with a link to the paper on archive.",
     "followups": "New in the final version: after each answer, a second, small Kwen call suggests what a researcher "
                  "would most likely ask next. One goes deeper, one compares with a related method, and one asks about "
@@ -148,11 +177,11 @@ NARRATION = {
     "graph": "The citation neighbours view shows which corpus papers cite each other. A citation is never treated as "
              "agreement, and because the graph did not measurably improve retrieval, it is off by default.",
     "eval": "Finally, the evaluation tab. The new stage-by-stage report measures accuracy at every step of the "
-            "pipeline: chunking; retrieval and reranking with recall, M R R and N D C G; the evidence pack; the answer, "
-            "with ROUGE, token F 1 and semantic similarity against reference answers; citation grounding; and the "
+            "pipeline: chunking; retrieval and reranking with recall, MRR and N D C G; the evidence pack; the answer, "
+            "with ROUGE, token F1 and semantic similarity against reference answers; citation grounding; and the "
             "follow-up suggestions.",
     "eval2": "{eval_numbers}",
-    "outro": "A I ResearchGraph. Every claim cited, comparability flagged, and an honest answer when the papers do not "
+    "outro": "AI ResearchGraph. Every claim cited, comparability flagged, and an honest answer when the papers do not "
              "support one. Thank you.",
 }
 
@@ -170,7 +199,7 @@ def eval_numbers() -> str:
         b3 = r["B3 + per-entity (app default)"]["passage_hit10"]["mean"]
         pct = lambda x: f"{round(100 * x)} percent"
         return (f"On the curated questions, the gold passage is in the top ten for {pct(b2)} of questions with hybrid "
-                f"search and {pct(b3)} after reranking. Answers reach a ROUGE L F 1 of {a['rougeL_f']['mean']:.2f} and a "
+                f"search and {pct(b3)} after reranking. Answers reach a ROUGE-L F1 of {a['rougeL_f']['mean']:.2f} and a "
                 f"semantic similarity of {a['semantic_sim']['mean']:.2f} against the reference answers, and "
                 f"{pct(a['claim_rougeL_precision_vs_cited']['mean'])} of each claim's words are found in the passages "
                 f"it cites.")
@@ -181,17 +210,21 @@ def eval_numbers() -> str:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.path.join(ROOT, "reports", "demo", "researchgraph_demo.mp4"))
-    ap.add_argument("--voice", default="Samantha")
-    ap.add_argument("--rate", type=int, default=178)
+    ap.add_argument("--tts", choices=["edge", "say"], default="edge",
+                    help="edge = Microsoft neural voice (online, natural); say = macOS voice (offline)")
+    ap.add_argument("--voice", default=None, help="default: en-US-AndrewNeural (edge) or Daniel (say)")
+    ap.add_argument("--rate", default=None, help="default: -5%% (edge) or 175 words/min (say)")
     args = ap.parse_args()
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     tmp = tempfile.mkdtemp(prefix="rg_demo_")
 
     NARRATION["eval2"] = eval_numbers()
+    voice = args.voice or ("en-US-AndrewNeural" if args.tts == "edge" else "Daniel")
+    rate = args.rate or ("-5%" if args.tts == "edge" else "175")
     clips = {}
     for k, text in NARRATION.items():
         path = os.path.join(tmp, f"{k}.wav")
-        clips[k] = {"path": path, "dur": speak(text, path, args.voice, args.rate), "text": text}
+        clips[k] = {"path": path, "dur": speak(text, path, args.tts, voice, rate), "text": text}
     print("narration total %.0fs" % sum(c["dur"] for c in clips.values()))
 
     with sync_playwright() as p:
