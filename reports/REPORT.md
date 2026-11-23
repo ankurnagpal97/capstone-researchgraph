@@ -275,7 +275,7 @@ The final failures, sorted into the course's four categories (retrieval miss, re
 - **The 20 curated questions added on 23 Nov (q43–q62) were written after the system existed,** with gold passages found using our own retriever and reranker. Both systems answered all 20 correctly, so they are easier than q01–q42 and tilt passage-level metrics towards B3.
 - **The evaluation set was not written before the code,** as the course asks; see [SPEC.md](SPEC.md).
 - **The agent's critic retries too often (48%) and its planner rarely uses tools other than search;** neither was tuned, to keep the curated set a clean test.
-- **The Docker image was written but not test-built** on the development machine (no Docker installed there).
+- **The Docker image (2.3 GB, CPU-only torch) was built and tested on one machine only** (Apple silicon, Docker 29.9): a live question was answered from inside the container. The course VMs host only the model APIs, so the container is not deployed anywhere public.
 
 ## 7. Future work
 

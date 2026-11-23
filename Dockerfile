@@ -11,7 +11,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 \
 WORKDIR /app
 
 # CPU-only torch keeps the image ~1.5 GB smaller than the default CUDA wheel.
-RUN pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cpu
+RUN pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple
 COPY requirements.txt .
 RUN grep -vE "^(torch|playwright|imageio-ffmpeg|edge-tts|ipykernel|pytest)==" requirements.txt > req-app.txt \
     && pip install -r req-app.txt
