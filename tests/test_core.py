@@ -165,6 +165,8 @@ def test_extract_entities():
     assert extract_entities("How does HippoRAG 2 build on HippoRAG?") == ["HippoRAG 2", "HippoRAG"]
     assert extract_entities("Compare HyDE and Query2doc") == ["HyDE", "Query2doc"]
     assert extract_entities("Is RAG better than LLMs for QA in 2024?") == []      # generic acronyms, years
+    # PII placeholders from guard.scrub_pii are not method names
+    assert extract_entities("My email is [EMAIL] and my phone is [PHONE]. Which papers evaluate RAGAS?") == ["RAGAS"]
 
 
 def _pack(papers):

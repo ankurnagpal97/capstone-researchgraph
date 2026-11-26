@@ -79,7 +79,9 @@ def extract_entities(question: str) -> list[str]:
     """Method, model or dataset names in a question, in order, no duplicates:
     tokens with 2+ capitals (RAGAS, IRCoT, HippoRAG 2, Self-RAG, RA-DIT, Search-R1), a capital plus a digit
     (Query2doc), or a capitalised word mid-sentence (Contriever, Atlas), joined with a following generic
-    acronym when there is one (Speculative RAG). Generic acronyms alone (RAG, LLM, QA...) are ignored."""
+    acronym when there is one (Speculative RAG). Generic acronyms alone (RAG, LLM, QA...) are ignored.
+    PII placeholders left by guard.scrub_pii ([EMAIL], [PHONE], ...) are not names and are removed first."""
+    question = re.sub(r"\[[A-Z_]+\]", " ", question)
     toks = list(re.finditer(r"[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*(?: \d\b)?", question))
     out = []
     for n, m in enumerate(toks):

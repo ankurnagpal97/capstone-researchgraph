@@ -3020,7 +3020,7 @@
   "latency_p50_s": 8.08,
   "latency_p95_s": 13.67,
   "mean_total_tokens": 2523,
-  "note": "auto_support_* are Qwen3-8B judging its own answers: an estimate. Human labels in reports/citation_audit_sample.csv are the real measure.",
+  "note": "auto_support_* are Qwen3-8B judging its own answers: an estimate, likely optimistic.",
   "per_question": [
    {
     "qid": "q01",

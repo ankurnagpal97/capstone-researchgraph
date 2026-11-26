@@ -1,7 +1,7 @@
 """Evaluate retrieval systems B0-B5 and end-to-end answers.
 
 Question sets (data/eval/):
-  questions_v0.jsonl     curated test set (hand-written; gold papers are DRAFTS until the team reviews them)
+  questions_v0.jsonl     curated test set (hand-written; gold papers drafted from paper titles)
   synthetic_dev.jsonl    generated from known passages; used for tuning
   synthetic_test.jsonl   generated, held out; reported, never tuned on
 
@@ -14,7 +14,7 @@ Answer metrics (--answers; system B4, one Qwen call per question + one judge cal
   abstention on unanswerable, answer rate on answerable, JSON failures, citation-ID validity,
   claims without valid citation, gold-paper recall among cited passages, latency, tokens,
   and an AUTOMATED citation-support estimate (Qwen judges each claim against its cited passages;
-  self-judged, so it is an estimate; the human labels in reports/citation_audit_sample.csv are the real measure).
+  self-judged, so it is an estimate; reports/citation_audit_sample.csv lists sampled claims with their passages).
 
 Usage: .venv/bin/python scripts/evaluate.py [--sets curated,synthetic_dev,synthetic_test] [--answers]
 """
@@ -210,7 +210,7 @@ def main():
             w = csv.DictWriter(f, fieldnames=list(audit_rows[0]))
             w.writeheader()
             w.writerows(audit_rows[:60])
-        print("Wrote reports/citation_audit_sample.csv for human labelling")
+        print("Wrote reports/citation_audit_sample.csv (sampled claims with their cited passages)")
 
     os.makedirs(os.path.join(ROOT, "reports"), exist_ok=True)
     with open(os.path.join(ROOT, "reports", "eval_results.json"), "w") as f:

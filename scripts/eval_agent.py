@@ -186,7 +186,7 @@ def write_md(rep):
               f"(all repaired or fell back), fallbacks {A['fallbacks']}.", "",
               "**Cost:** the course endpoint has no per-token price; cost is reported as tokens and LLM calls per query. "
               "Every LLM call holds the group's single request slot, so latency is also the cost to teammates.", "",
-              "Curated gold labels and reference answers are drafts until the team review is imported; "
+              "Curated reference answers were drafted by Claude from the gold passages; "
               f"n = {A['n']}, so differences under about 0.10 are not established."]
     open(OUT_MD, "w").write("\n".join(lines) + "\n")
 

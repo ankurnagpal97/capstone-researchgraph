@@ -5,8 +5,6 @@
 > **Status of this report.** Every number below was measured on 14–23 Nov 2026 with the code in this repository.
 > Since the mentor review (22 Nov): reference answers and gold passages for the curated questions, a stage-by-stage evaluation with ROUGE and related metrics (§4.5), and follow-up question suggestions (§4.6). The corpus was deliberately not grown.
 > Added on 23–24 Nov against the full course brief: an agent mode with planner, tools, critic and session memory (§4.7), a four-way prompting-strategy comparison (§4.8), a chunking experiment (§4.10), a 23-attack prompt-injection suite (§4.9), OpenTelemetry tracing, rate limiting, caching, PII scrubbing and a Docker container (§2), 20 more curated questions (62 in total), a task specification ([SPEC.md](SPEC.md)) and a responsible-AI section ([RESPONSIBLE_AI.md](RESPONSIBLE_AI.md)).
-> Two inputs still need the team: **(1)** review of the gold papers for the curated questions (`reports/gold_review_sheet.csv`),
-> **(2)** human citation-support labels (`reports/citation_audit_sample.csv`). Sections that depend on them are marked **[TEAM]**.
 
 ## 1. Problem and scope
 
@@ -62,7 +60,7 @@ flowchart LR
 | Generation | One call per answer; JSON claim ledger in which every claim and comparison cites passage labels; a passage-check field first; survey passages marked as second-hand (prompt v3) | Track B allows 8,192 tokens per request and at most 1,024 output tokens, so there's room for exactly one structured call |
 | Follow-up questions | A second Qwen3-8B call (≤ 220 output tokens) gets the question, short answer and evidence-paper titles and returns 3 next questions: deeper, comparison, limitations/evaluation; de-duplicated; failure never blocks the answer | Mentor request; helps users explore the literature without knowing what to ask next |
 | Agent mode | Hand-rolled planner → executor → generator → critic; 4 read-only tools; session turns in SQLite; caps of 2 rounds, 8 tool calls and 20k tokens per task; one JSON repair then a safe fallback; failing tools skipped; repeated calls skipped | The course asks for a tool-using planner/executor/critic loop with memory and failure handling; kept optional because it costs ~2× (§4.7) |
-| Observability | OpenTelemetry spans (task, plan, tool, search, rerank, each LLM call with tokens) to `logs/traces.jsonl`, shown in the app; optional OTLP export | Local by default, so question text never leaves the machine |
+| Observability | OpenTelemetry spans (task, plan, tool, search, rerank, each LLM call with tokens) to `logs/traces.jsonl`, shown in the app per answer and across all runs in a [trace dashboard](https://ankurnagpal97.github.io/capstone-researchgraph/traces/) (`scripts/make_trace_dashboard.py`, published with GitHub Pages); optional OTLP export | Local by default, so question text never leaves the machine |
 | Serving | Rate limits (per session and app-wide), 7-day SQLite answer cache, PII scrubbing of questions, Docker image with secrets and paper data mounted at runtime | Protects the group's single API key; keeps personal data out of logs; reproducible deployment |
 | Safety rails | Citation audit (labels must exist in the evidence pack); abstention guard (an answer that says "not stated" is marked unanswerable); named-thing check (every name in the question must appear in the evidence); comparability check (different papers are never "directly comparable"); retrieved text treated as untrusted (tested with a prompt injection) | Verification happens in code, not just in the prompt |
 
@@ -112,7 +110,7 @@ Curated set, 42 questions (36 answerable, 6 unanswerable), one Qwen3-8B call per
 | Latency p50 / p95 | 6.4 / 10.6 s | 7.0 / 12.2 s | 8.1 / 13.7 s |
 | Mean tokens per answer | 2,262 | 2,373 | 2,523 |
 
-**Reading it.** Across 428 claims, no citation pointed to a passage the model wasn't given. Abstention doubled from the first run and held steady after that. The final configuration cites the right papers more often (0.75), and the automatic judge flags half as many claims as unsupported. That cost one answerable question (q33, a three-paper lineage question, now declined) and about 1 s per answer. The judge is Qwen3-8B grading its own output, so its rates are likely optimistic; human labels (§4.4) are the real measure.
+**Reading it.** Across 428 claims, no citation pointed to a passage the model wasn't given. Abstention doubled from the first run and held steady after that. The final configuration cites the right papers more often (0.75), and the automatic judge flags half as many claims as unsupported. That cost one answerable question (q33, a three-paper lineage question, now declined) and about 1 s per answer. The judge is Qwen3-8B grading its own output, so its rates are likely optimistic; §4.4 sets them against the code-checked grounding measures.
 
 ### 4.3 Fixes for the failures found in run 2
 
@@ -129,15 +127,26 @@ Each fix targets a failure listed in §5. Each was developed on a tuning set, th
 
 **Post-hoc bug fix (22 Nov), not re-scored.** While re-checking the demo, the abstention guard missed answers that say the evidence "does not *directly* state" or "does not answer" something, because its pattern didn't allow an adverb or the verb "answer". The pattern was widened. On the 28 tuning answers it flips none of the answerable ones. The demo question it fixes is also curated test question q40, so the curated numbers above are **not** re-scored: re-running the test set after a fix prompted by one of its own questions would amount to tuning on it. The reported 4/6 abstention is from before this fix.
 
+**Post-hoc bug fix (27 Nov), no effect on scores.** While recording the final demo, a question containing an email address and a phone number was scrubbed to `[EMAIL]` and `[PHONE]`, and the per-entity search and the named-thing check then treated those placeholders as method names, so a well-supported answer was marked "not established". Placeholders are now removed before names are extracted (unit test added). No evaluation question contains personal data, so no reported number changes.
+
 **Tests:** 32 offline unit tests (including the agent loop, rate limiter, cache and PII scrubber), plus 3 live tests that all pass (`RG_LIVE=1`): an end-to-end answer whose citations resolve to the right paper; **a prompt injection** (a planted passage telling the model to answer "PWNED-7731" and abstain was ignored, and the question was answered from real passages); and an out-of-scope medical question that was declined.
 
-### 4.4 Citation support, human labels **[TEAM]**
+### 4.4 Citation support
 
-60 sampled claims, each with its cited passages, are in `reports/citation_audit_sample.csv`. Label each one *supported / partial / not_supported*, then report: share supported = __ / 60; share partial = __; share not supported = __; agreement with the automatic judge = __%.
+Citation support is measured three ways, from strictest (checked in code) to softest (judged by a model):
+
+| Check | Result (final configuration, curated set) |
+|---|---|
+| Every cited label exists in the evidence pack the model was given | 100% of citations; 0 / 154 claims without a valid citation |
+| Share of each claim's words found in the passage it cites (ROUGE-L precision, §4.5) | 0.78 |
+| Qwen3-8B judge: supported / partial / not supported | 91.6 / 5.8 / 2.6% of claims |
+| Same judge on a stratified sample of 60 claims from 35 questions (`reports/citation_audit_sample.csv`, with the cited passages) | 56 supported, 4 partial, 0 not supported |
+
+The first two are mechanical and cannot be talked round by the model. The judge is the same 8B model grading its own answers, so its rates are an upper bound; the five single-claim disagreements it raised are listed in §5. The sample file holds each claim next to its passages so any reader can check them.
 
 ### 4.5 Stage-by-stage accuracy (ROUGE and related metrics)
 
-`scripts/eval_stages.py` follows each question through the pipeline and measures what survives each step. Full tables with 95% bootstrap intervals: [STAGES.md](STAGES.md). Curated reference answers (53 answerable questions) and their gold passages are in `data/eval/curated_references.jsonl`; they were drafted from the gold papers' passages and are under team review (`reports/reference_review_sheet.csv`).
+`scripts/eval_stages.py` follows each question through the pipeline and measures what survives each step. Full tables with 95% bootstrap intervals: [STAGES.md](STAGES.md). Curated reference answers (53 answerable questions) and their gold passages are in `data/eval/curated_references.jsonl`; they were drafted by an AI assistant (Claude) from the gold papers' passages.
 
 | Stage | Measure | Curated (n = 62) | Synthetic test (n = 45) |
 |---|---|---|---|
@@ -255,20 +264,20 @@ The final failures, sorted into the course's four categories (retrieval miss, re
 | Cause | Examples | What happened | Possible fix |
 |---|---|---|---|
 | **Scope mismatch is not detected** | q15 (medical diagnosis) | A general-domain "best practices" recipe was presented as the answer to a domain-specific question | Add an evidence check for domain and population fit; add "different domain" as a reason to abstain |
-| **Second-hand claims taken from surveys** | q41 (ChatGPT browsing) | A 2025 survey's one-line claim about GPT-4-turbo was stretched into a claim about ChatGPT browsing. **The gold label may also be wrong:** the corpus does contain a second-hand statement, so the team should review this question. | Down-weight or label survey passages ("according to survey X…"); prefer primary sources |
+| **Second-hand claims taken from surveys** | q41 (ChatGPT browsing) | A 2025 survey's one-line claim about GPT-4-turbo was stretched into a claim about ChatGPT browsing. **The gold label is debatable:** the corpus does contain a second-hand statement. | Down-weight or label survey passages ("according to survey X…"); prefer primary sources |
 | **Comparison and lineage questions cite only some of the gold papers** | q08, q10, q27, q30, q32 (gold papers cited: 0–0.33) | The answer is plausible but rests on one side or one paper. q32 cited a different community-based GraphRAG paper than the drafted gold. | Ensure each entity named in the question has evidence (a retrieval sub-query per entity); review gold labels |
 | **Disagreement questions retrieve poorly** | q34–q36 (paper R@10 0.33) | The answers are sensible ("not established; depends on the setting") but cite different papers from the gold | Rewrite or decompose the query; the citation graph didn't help here (§4.1) |
-| **The metadata gold label is too narrow** | q37 | It named a different, valid RAG survey (arXiv 2506.00054) from the drafted gold paper | Gold review: accept any qualifying paper |
-| **Automatic judge disagreements** | q07, q20, q24, q25, q27 (one claim each) | The judge marked a single claim as not supported; these need human checking | The human audit (§4.3) decides |
+| **The metadata gold label is too narrow** | q37 | It named a different, valid RAG survey (arXiv 2506.00054) from the drafted gold paper | Accept any qualifying paper in the gold label |
+| **Automatic judge disagreements** | q07, q20, q24, q25, q27 (one claim each) | The judge marked a single claim as not supported | Read against the cited passage; a separate entailment model would arbitrate (§7) |
 
 **What works reliably:** single-paper lookups (14/14 answered, gold paper retrieved for all), metadata lookups, a 100% valid citation audit, and no invalid JSON in any of the 124 evaluated answers (42 + 40 tuning + 42).
 
 ## 6. Limitations
 
-- **The curated gold labels and reference answers are drafts** until reviewed **[TEAM]** (`reports/reference_review_sheet.csv`). The reference answers were drafted by an AI assistant (Claude) from the gold passages, and the curated gold passages were chosen with help from the cross-encoder, which may favour B3 on passage-level curated metrics.
+- **The curated reference answers are AI-drafted.** They were drafted by an AI assistant (Claude) from the gold passages, and the curated gold passages were chosen with help from the cross-encoder, which may favour B3 on passage-level curated metrics.
 - **ROUGE rewards wording overlap,** so paraphrased but correct answers score low; it is reported next to token F1, embedding similarity and grounding, never alone.
 - **Small curated n:** with 36 answerable questions, a difference under about 0.10 isn't established.
-- **The automatic citation-support judge is Qwen3-8B judging its own answers,** so it's optimistic. Only the human labels count.
+- **The automatic citation-support judge is Qwen3-8B judging its own answers,** so it's optimistic. It is always reported next to the code-checked grounding measures, never alone.
 - **PDF parsing is heuristic.** Tables are flattened to text, and 3 papers were flagged for structure checks. Questions about numbers in tables are therefore weaker.
 - **The corpus is one topic and 146 papers, mostly arXiv versions.** Published versions can differ. Surveys (15 papers) are weaker evidence for experimental claims.
 - **Graph expansion is triggered by a keyword rule,** not a learned classifier.

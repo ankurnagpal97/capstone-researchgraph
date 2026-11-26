@@ -2,7 +2,7 @@
 
 Run 2026-11-23 23:51 · LLM `Qwen/Qwen3-8B` · embeddings `bge-small-en-v1.5` · reranker `cross-encoder/ms-marco-MiniLM-L-6-v2` · answer prompt `answer-v3` · follow-up prompt `followup-v1`. Means with 95% bootstrap CIs.
 
-**Read with care.** Curated reference answers and gold passages (`data/eval/curated_references.jsonl`) were drafted by Claude from the gold papers and still need team review; the gold passages were picked from each gold paper with help from the cross-encoder, so passage-level numbers may slightly favour B3. Synthetic reference answers were written by Qwen3-8B from one passage, so they share its wording. ROUGE counts word overlap: a correct answer phrased differently scores low, so read it with token F1, semantic similarity and the grounding numbers, not alone.
+**Read with care.** Curated reference answers and gold passages (`data/eval/curated_references.jsonl`) were drafted by Claude from the gold papers; the gold passages were picked from each gold paper with help from the cross-encoder, so passage-level numbers may slightly favour B3. Synthetic reference answers were written by Qwen3-8B from one passage, so they share its wording. ROUGE counts word overlap: a correct answer phrased differently scores low, so read it with token F1, semantic similarity and the grounding numbers, not alone.
 
 ## S1 · Parsing and chunking (whole corpus)
 

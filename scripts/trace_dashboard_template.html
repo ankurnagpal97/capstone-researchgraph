@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ResearchGraph Traces</title>
+<meta name="description" content="OpenTelemetry trace dashboard for AI ResearchGraph (IIT KGP capstone, Track B, Qwen3-8B).">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f4f3ef; --surface-1: #fcfcfb; --surface-2: #f0efeb; --border: #e2e0da;
+  --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #7a7974;
+  --grid: #e7e5df; --accent: #2a78d6;
+  --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a;
+  --hover: rgba(42,120,214,.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #111110; --surface-1: #1a1a19; --surface-2: #232321; --border: #2f2f2c;
+    --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #8f8e86;
+    --grid: #2c2c29; --accent: #3987e5;
+    --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70;
+    --hover: rgba(57,135,229,.14);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111110; --surface-1: #1a1a19; --surface-2: #232321; --border: #2f2f2c;
+  --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #8f8e86;
+  --grid: #2c2c29; --accent: #3987e5;
+  --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70;
+  --hover: rgba(57,135,229,.14);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text-primary);
+  font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 28px 16px 60px; }
+header h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -.01em; }
+header p { margin: 0; color: var(--text-secondary); }
+header .meta { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; }
+a { color: var(--accent); }
+.grid { display: grid; gap: 14px; }
+.kpis { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: 22px 0 14px; }
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px; min-width: 0; }
+.kpi .v { font-size: 26px; font-weight: 650; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.kpi .l { color: var(--text-secondary); font-size: 12.5px; }
+.kpi .s { color: var(--text-muted); font-size: 11.5px; margin-top: 2px; }
+h2 { font-size: 15px; margin: 0 0 2px; }
+.sub { color: var(--text-muted); font-size: 12.5px; margin: 0 0 12px; }
+.two { grid-template-columns: 1fr 1fr; }
+.four { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 860px) { .two, .four { grid-template-columns: 1fr; } }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--text-secondary); margin-bottom: 10px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th { font-weight: 600; color: var(--text-secondary); font-size: 12px; }
+td.num, th.num { text-align: right; }
+tbody tr:hover { background: var(--hover); }
+.barcell { width: 38%; min-width: 140px; }
+.inl { position: relative; height: 12px; }
+.inl .b { position: absolute; left: 0; top: 2px; height: 8px; border-radius: 0 4px 4px 0; }
+.inl .w { position: absolute; top: 5px; height: 2px; background: var(--text-muted); opacity: .6; }
+.inl .t { position: absolute; top: 1px; width: 2px; height: 10px; background: var(--text-muted); }
+.scroll { overflow-x: auto; }
+svg text { fill: var(--text-muted); font-size: 11px; }
+.axis line, .axis path { stroke: var(--grid); }
+.tip { position: fixed; pointer-events: none; background: var(--surface-1); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.18);
+  max-width: 360px; z-index: 10; display: none; }
+.tip b { font-weight: 600; } .tip .k { color: var(--text-muted); }
+.hbars .row { display: grid; grid-template-columns: 130px 1fr 44px; gap: 8px; align-items: center; margin: 5px 0; font-size: 12.5px; }
+.hbars .row .n { color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hbars .row .v { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.hbars .track { height: 10px; }
+.hbars .fill { height: 10px; border-radius: 0 4px 4px 0; background: var(--series-1); }
+.explorer { grid-template-columns: 380px 1fr; align-items: start; }
+@media (max-width: 960px) { .explorer { grid-template-columns: 1fr; } }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: transparent; color: var(--text-secondary); padding: 6px 10px; font: inherit; font-size: 12.5px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--text-primary); font-weight: 600; }
+input[type=search] { flex: 1; min-width: 140px; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface-1); color: var(--text-primary); font: inherit; font-size: 12.5px; }
+.list { max-height: 560px; overflow: auto; border-top: 1px solid var(--grid); }
+.item { padding: 9px 6px; border-bottom: 1px solid var(--grid); cursor: pointer; border-radius: 6px; }
+.item:hover { background: var(--hover); }
+.item[aria-selected="true"] { background: var(--surface-2); }
+.item .q { font-size: 13px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.item .m { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
+.pill { display: inline-block; font-size: 10.5px; padding: 1px 6px; border-radius: 99px; border: 1px solid var(--border); color: var(--text-secondary); margin-right: 6px; }
+.wf-head .q { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+.wf-head .m { color: var(--text-muted); font-size: 12.5px; margin-bottom: 10px; }
+.attrs { margin-top: 12px; font-size: 12.5px; background: var(--surface-2); border-radius: 8px; padding: 10px 12px; min-height: 44px; word-break: break-word; }
+.attrs code { font-size: 12px; }
+footer { color: var(--text-muted); font-size: 12px; margin-top: 26px; }
+.toggle { float: right; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary); border-radius: 8px; padding: 5px 10px; cursor: pointer; font: inherit; font-size: 12.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <button class="toggle" id="theme" type="button">Toggle theme</button>
+    <h1>AI ResearchGraph · trace dashboard</h1>
+    <p>OpenTelemetry spans from the pipeline and the agent (planner → tools → answer → critic), Qwen3-8B on the course Track B API.</p>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <section class="grid kpis" id="kpis"></section>
+
+  <section class="card" style="margin-bottom:14px">
+    <h2>Latency and tokens by span type</h2>
+    <p class="sub">Bar = median (p50) duration; whisker runs to p95. Log scale, since spans range from milliseconds to tens of seconds.</p>
+    <div class="legend" id="legend1"></div>
+    <div class="scroll"><table id="types"></table></div>
+  </section>
+
+  <section class="grid two" style="margin-bottom:14px">
+    <div class="card">
+      <h2>Agent task latency, end to end</h2>
+      <p class="sub" id="latsub"></p>
+      <div id="hist"></div>
+    </div>
+    <div class="card">
+      <h2>Tokens per LLM call</h2>
+      <p class="sub">Mean prompt + completion tokens per call, by call type (Track B caps a request at 8,192).</p>
+      <div class="hbars" id="tokens"></div>
+    </div>
+  </section>
+
+  <section class="grid four" style="margin-bottom:14px">
+    <div class="card"><h2>Tool calls</h2><p class="sub">By the agent's executor</p><div class="hbars" id="tools"></div></div>
+    <div class="card"><h2>Critic verdicts</h2><p class="sub">One per critic round</p><div class="hbars" id="verdicts"></div></div>
+    <div class="card"><h2>Rounds per task</h2><p class="sub">Capped at 2</p><div class="hbars" id="rounds"></div></div>
+    <div class="card"><h2>Stop reasons</h2><p class="sub">Why each agent task ended</p><div class="hbars" id="stops"></div></div>
+  </section>
+
+  <section class="card">
+    <h2>Trace explorer</h2>
+    <p class="sub">Every agent and pipeline task with its full span tree. Hover a span for timing; click it to see its attributes.</p>
+    <div class="grid explorer">
+      <div>
+        <div class="filters">
+          <div class="seg" id="kind">
+            <button type="button" data-k="all" aria-pressed="true">All</button>
+            <button type="button" data-k="agent" aria-pressed="false">Agent</button>
+            <button type="button" data-k="pipeline" aria-pressed="false">Pipeline</button>
+          </div>
+          <input type="search" id="q" placeholder="Filter by question…" aria-label="Filter traces by question">
+        </div>
+        <div class="list" id="list" role="listbox" aria-label="Traces"></div>
+      </div>
+      <div>
+        <div class="wf-head" id="wfhead"></div>
+        <div class="legend" id="legend2"></div>
+        <div class="scroll" id="wf"></div>
+        <div class="attrs" id="attrs">Click a span to see its attributes.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Generated by <code>scripts/make_trace_dashboard.py</code> from <code>logs/traces.jsonl</code>, written by
+    <code>researchgraph/tracing.py</code>. Questions are PII-scrubbed before tracing; session IDs are removed.
+    Source: <a href="https://github.com/ankurnagpal97/capstone-researchgraph">github.com/ankurnagpal97/capstone-researchgraph</a>
+  </footer>
+</div>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const $ = s => document.querySelector(s);
+const fmtInt = n => n == null ? '–' : Math.round(n).toLocaleString('en-US');
+const fmtMs = ms => ms == null ? '–' : ms >= 1000 ? (ms / 1000).toFixed(ms >= 10000 ? 0 : 1) + ' s' : (ms >= 10 ? Math.round(ms) : ms.toFixed(1)) + ' ms';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const CATS = { orchestration: ['Orchestration (task, plan, execute, critic)', 'var(--series-1)'],
+               retrieval: ['Retrieval & tools (search, rerank, tool calls)', 'var(--series-2)'],
+               llm: ['LLM calls (Qwen3-8B)', 'var(--series-3)'] };
+
+// theme toggle (per-viewer convenience)
+(function () {
+  try { const t = localStorage.getItem('rg-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#theme').onclick = () => {
+    const dark = getComputedStyle(document.documentElement).colorScheme.includes('dark');
+    const t = dark ? 'light' : 'dark';
+    document.documentElement.dataset.theme = t;
+    try { localStorage.setItem('rg-theme', t); } catch (e) {}
+  };
+})();
+
+// tooltip
+const tip = $('#tip');
+function showTip(e, html) { tip.innerHTML = html; tip.style.display = 'block'; moveTip(e); }
+function moveTip(e) {
+  const r = tip.getBoundingClientRect();
+  let x = e.clientX + 14, y = e.clientY + 14;
+  if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+  if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+  tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
+}
+function hideTip() { tip.style.display = 'none'; }
+function bindTip(el, html) { el.addEventListener('mouseenter', e => showTip(e, html)); el.addEventListener('mousemove', moveTip); el.addEventListener('mouseleave', hideTip); }
+
+const K = DATA.kpi;
+$('#meta').textContent = `Spans recorded ${DATA.window[0]} – ${DATA.window[1]} · dashboard built ${DATA.generated}`;
+
+// KPIs
+[[fmtInt(K.traces), 'Traces', `${fmtInt(K.tasks)} full tasks (agent + pipeline)`],
+ [fmtInt(K.spans), 'Spans', `${K.errors} with error status`],
+ [fmtInt(K.llm_calls), 'LLM calls', `${fmtInt(K.tokens)} tokens in total`],
+ [K.answer_p50 + ' s', 'Answer call p50', 'one Qwen3-8B JSON answer'],
+ [K.agent_p50 + ' s', 'Agent task p50', `p95 ${K.agent_p95} s · ${K.agent_tasks} tasks`]]
+  .forEach(([v, l, s]) => { $('#kpis').insertAdjacentHTML('beforeend', `<div class="card kpi"><div class="v">${v}</div><div class="l">${l}</div><div class="s">${s}</div></div>`); });
+
+// legend
+const legendHtml = Object.values(CATS).map(([n, c]) => `<span><i style="background:${c}"></i>${n}</span>`).join('');
+$('#legend1').innerHTML = legendHtml; $('#legend2').innerHTML = legendHtml;
+
+// span-type table with log-scale inline bars
+(function () {
+  const maxMs = Math.max(...DATA.span_types.map(t => t.p95));
+  const lg = v => Math.log10(Math.max(v, 1)) / Math.log10(Math.max(maxMs, 10));
+  let h = `<thead><tr><th>Span</th><th class="num">Count</th><th class="num">p50</th><th class="num">p95</th><th class="barcell">Duration (log scale)</th><th class="num">Mean tokens</th><th class="num">Total tokens</th></tr></thead><tbody>`;
+  DATA.span_types.forEach((t, i) => {
+    const c = CATS[t.category][1];
+    h += `<tr data-i="${i}"><td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${c};margin-right:8px"></span>${esc(t.name)}</td>
+      <td class="num">${fmtInt(t.count)}</td><td class="num">${fmtMs(t.p50)}</td><td class="num">${fmtMs(t.p95)}</td>
+      <td class="barcell"><div class="inl"><div class="b" style="width:${(lg(t.p50) * 100).toFixed(1)}%;background:${c}"></div>
+        <div class="w" style="left:${(lg(t.p50) * 100).toFixed(1)}%;width:${((lg(t.p95) - lg(t.p50)) * 100).toFixed(1)}%"></div>
+        <div class="t" style="left:calc(${(lg(t.p95) * 100).toFixed(1)}% - 1px)"></div></div></td>
+      <td class="num">${t.mean_tokens == null ? '–' : fmtInt(t.mean_tokens)}</td><td class="num">${t.total_tokens == null ? '–' : fmtInt(t.total_tokens)}</td></tr>`;
+  });
+  $('#types').innerHTML = h + '</tbody>';
+  $('#types').querySelectorAll('tbody tr').forEach(tr => {
+    const t = DATA.span_types[tr.dataset.i];
+    bindTip(tr, `<b>${esc(t.name)}</b><br><span class="k">count</span> ${fmtInt(t.count)} · <span class="k">p50</span> ${fmtMs(t.p50)} · <span class="k">p95</span> ${fmtMs(t.p95)}` +
+      (t.mean_tokens ? `<br><span class="k">mean tokens</span> ${fmtInt(t.mean_tokens)}` : ''));
+  });
+})();
+
+// histogram of agent task latency
+(function () {
+  const xs = DATA.agent_latency_s;
+  $('#latsub').textContent = `${xs.length} agent tasks · p50 ${K.agent_p50} s · p95 ${K.agent_p95} s · bins of 5 s`;
+  const bw = 5, maxX = Math.ceil(Math.max(...xs) / bw) * bw, nb = maxX / bw;
+  const bins = Array.from({ length: nb }, (_, i) => ({ lo: i * bw, hi: (i + 1) * bw, n: 0 }));
+  xs.forEach(x => bins[Math.min(nb - 1, Math.floor(x / bw))].n++);
+  const W = 520, H = 220, m = { l: 34, r: 8, t: 10, b: 30 }, iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const maxN = Math.max(...bins.map(b => b.n)), yt = Math.ceil(maxN / 5) * 5 || 5;
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Histogram of agent task latency">`;
+  for (let v = 0; v <= yt; v += yt / 5) {
+    const y = m.t + ih - v / yt * ih;
+    s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y}" y2="${y}" stroke="var(--grid)"/><text x="${m.l - 6}" y="${y + 4}" text-anchor="end">${v}</text>`;
+  }
+  const bwpx = iw / nb;
+  bins.forEach((b, i) => {
+    const h = b.n / yt * ih, x = m.l + i * bwpx + 1, y = m.t + ih - h;
+    if (b.n) s += `<path data-i="${i}" d="M${x} ${m.t + ih} V${y + 4} Q${x} ${y} ${x + 4} ${y} H${x + bwpx - 6} Q${x + bwpx - 2} ${y} ${x + bwpx - 2} ${y + 4} V${m.t + ih} Z" fill="var(--series-1)"/>`;
+    s += `<rect class="hit" data-i="${i}" x="${m.l + i * bwpx}" y="${m.t}" width="${bwpx}" height="${ih}" fill="transparent"/>`;
+    if (i % 2 === 0) s += `<text x="${m.l + i * bwpx}" y="${H - 10}" text-anchor="middle">${b.lo}</text>`;
+  });
+  s += `<text x="${W - m.r}" y="${H - 10}" text-anchor="end">${maxX} s</text></svg>`;
+  $('#hist').innerHTML = s;
+  $('#hist').querySelectorAll('.hit').forEach(r => { const b = bins[r.dataset.i]; bindTip(r, `<b>${b.lo}–${b.hi} s</b><br>${b.n} task${b.n === 1 ? '' : 's'}`); });
+})();
+
+// simple horizontal bar lists
+function hbars(el, rows, unit = '') {
+  const max = Math.max(...rows.map(r => r[1]), 1);
+  el.innerHTML = rows.map(([n, v]) => `<div class="row"><span class="n" title="${esc(n)}">${esc(n)}</span><div class="track"><div class="fill" style="width:${(v / max * 100).toFixed(1)}%"></div></div><span class="v">${fmtInt(v)}</span></div>`).join('');
+  el.querySelectorAll('.row').forEach((r, i) => bindTip(r, `<b>${esc(rows[i][0])}</b><br>${fmtInt(rows[i][1])}${unit}`));
+}
+hbars($('#tokens'), DATA.span_types.filter(t => t.name.startsWith('llm.') && t.mean_tokens != null).map(t => [t.name.replace('llm.', ''), t.mean_tokens]), ' tokens per call (mean)');
+hbars($('#tools'), DATA.tools.map(([n, v]) => [n, v]), ' calls');
+hbars($('#verdicts'), DATA.verdicts, ' critic rounds');
+hbars($('#rounds'), DATA.rounds.map(([r, n]) => [r + (r === 1 ? ' round' : ' rounds'), n]), ' tasks');
+hbars($('#stops'), DATA.stops, ' tasks');
+
+// trace explorer
+let kind = 'all', query = '', sel = null;
+function renderList() {
+  const items = DATA.tasks.filter(t => (kind === 'all' || t.kind === kind) && (!query || t.question.toLowerCase().includes(query)));
+  $('#list').innerHTML = items.map(t => `<div class="item" role="option" data-id="${t.id}" aria-selected="${t.id === sel}">
+    <div class="q">${esc(t.question || '(no question recorded)')}</div>
+    <div class="m"><span class="pill">${t.kind}</span>${t.start} · ${fmtMs(t.duration_ms)} · ${fmtInt(t.tokens)} tok · ${t.llm_calls} LLM · ${t.tool_calls} tools</div></div>`).join('')
+    || '<p class="sub" style="padding:10px">No traces match.</p>';
+  $('#list').querySelectorAll('.item').forEach(el => el.onclick = () => select(el.dataset.id));
+}
+function depthOf(spans) {
+  const byId = Object.fromEntries(spans.map(s => [s.id, s])), memo = {};
+  const d = s => memo[s.id] ?? (memo[s.id] = byId[s.parent] ? d(byId[s.parent]) + 1 : 0);
+  spans.forEach(d); return memo;
+}
+function select(id) {
+  sel = id;
+  const t = DATA.tasks.find(x => x.id === id);
+  $('#list').querySelectorAll('.item').forEach(el => el.setAttribute('aria-selected', el.dataset.id === id));
+  $('#wfhead').innerHTML = `<p class="q">${esc(t.question)}</p><div class="m"><span class="pill">${t.kind}</span>${t.start} · total ${fmtMs(t.duration_ms)} · ${fmtInt(t.tokens)} tokens · ${t.llm_calls} LLM calls · ${t.tool_calls} tool calls${t.stop_reason ? ' · stopped: ' + esc(t.stop_reason) : ''} · trace <code>${t.id.slice(0, 12)}…</code></div>`;
+  const spans = t.spans, dep = depthOf(spans), total = Math.max(...spans.map(s => s.t + s.d));
+  const rowH = 22, lw = 190, W = 720, iw = W - lw - 10, H = spans.length * rowH + 28;
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:560px" role="img" aria-label="Span waterfall">`;
+  for (let k = 0; k <= 4; k++) {
+    const x = lw + iw * k / 4;
+    s += `<line x1="${x}" x2="${x}" y1="0" y2="${H - 20}" stroke="var(--grid)"/><text x="${x}" y="${H - 6}" text-anchor="${k === 0 ? 'start' : k === 4 ? 'end' : 'middle'}">${fmtMs(total * k / 4)}</text>`;
+  }
+  spans.forEach((sp, i) => {
+    const y = i * rowH + 4, x = lw + sp.t / total * iw, w = Math.max(3, sp.d / total * iw);
+    s += `<g class="sp" data-i="${i}" style="cursor:pointer"><rect x="0" y="${y - 2}" width="${W}" height="${rowH}" fill="transparent"/>
+      <text x="${4 + dep[sp.id] * 12}" y="${y + 13}" style="fill:var(--text-secondary)">${esc(sp.name)}</text>
+      <rect x="${x}" y="${y + 3}" width="${w}" height="12" rx="3" fill="${CATS[sp.cat][1]}"/></g>`;
+  });
+  $('#wf').innerHTML = s + '</svg>';
+  $('#wf').querySelectorAll('.sp').forEach(g => {
+    const sp = spans[g.dataset.i];
+    bindTip(g, `<b>${esc(sp.name)}</b><br><span class="k">starts at</span> +${fmtMs(sp.t)} · <span class="k">duration</span> ${fmtMs(sp.d)}` + (sp.attrs.tokens ? `<br><span class="k">tokens</span> ${fmtInt(sp.attrs.tokens)}` : ''));
+    g.onclick = () => {
+      const a = Object.entries(sp.attrs);
+      $('#attrs').innerHTML = `<b>${esc(sp.name)}</b> · ${fmtMs(sp.d)} · status ${esc(sp.status)}<br>` +
+        (a.length ? a.map(([k, v]) => `<span class="k" style="color:var(--text-muted)">${esc(k)}</span> <code>${esc(v)}</code>`).join(' · ') : '<span style="color:var(--text-muted)">no attributes</span>');
+    };
+  });
+  $('#attrs').textContent = 'Click a span to see its attributes.';
+}
+$('#kind').querySelectorAll('button').forEach(b => b.onclick = () => {
+  kind = b.dataset.k; $('#kind').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); renderList();
+});
+$('#q').oninput = e => { query = e.target.value.trim().toLowerCase(); renderList(); };
+renderList();
+const first = DATA.tasks.find(t => t.kind === 'agent' && t.tool_calls > 1) || DATA.tasks[0];
+if (first) select(first.id);
+</script>
+</body>
+</html>

@@ -4,7 +4,21 @@ Evidence-grounded question answering over **146 research papers on retrieval-aug
 Every claim in an answer cites the exact passage (paper, section, page) it comes from. Results that can't be compared are flagged, and the system says so when the indexed papers don't answer the question.
 A citation graph between papers is available as an optional retrieval step. A citation is never treated as evidence or agreement.
 
-Results: [reports/RESULTS.md](reports/RESULTS.md) · Stage-by-stage accuracy (ROUGE etc.): [reports/STAGES.md](reports/STAGES.md) · Full write-up: [reports/REPORT.md](reports/REPORT.md) · Demo: [reports/DEMO.md](reports/DEMO.md)
+## Submission links
+
+| Deliverable | Link |
+|---|---|
+| Technical report (PDF, links on page 1) | [reports/ResearchGraph_Technical_Report.pdf](reports/ResearchGraph_Technical_Report.pdf) · source [reports/REPORT.md](reports/REPORT.md) |
+| Trace dashboard | https://ankurnagpal97.github.io/capstone-researchgraph/traces/ (built by `scripts/make_trace_dashboard.py`) |
+| Demo video (about 10 minutes) | https://ankurnagpal97.github.io/capstone-researchgraph/demo/researchgraph_demo.mp4 · file: [docs/demo/researchgraph_demo.mp4](docs/demo/researchgraph_demo.mp4) |
+| Model card and Responsible AI | [reports/RESPONSIBLE_AI.md](reports/RESPONSIBLE_AI.md) |
+| Project page | https://ankurnagpal97.github.io/capstone-researchgraph/ |
+
+Results: [reports/RESULTS.md](reports/RESULTS.md) · Stage-by-stage accuracy (ROUGE etc.): [reports/STAGES.md](reports/STAGES.md) · Demo script: [reports/DEMO.md](reports/DEMO.md)
+
+Rebuild the submission artefacts: `.venv/bin/python scripts/make_trace_dashboard.py` (dashboard → `docs/traces/`),
+`.venv/bin/python scripts/record_demo.py` (video → `docs/demo/`, needs the app running on port 8502 and the course API),
+`.venv/bin/python scripts/build_report_pdf.py --author "…"` (PDF; needs `pip install markdown==3.7` and Chrome).
 
 ## Pipeline
 
@@ -88,7 +102,7 @@ RG_LIVE=1 .venv/bin/python -m pytest -q tests/test_live.py   # live end-to-end +
 # narrated demo video (neural voice via edge-tts, online; `--tts say` = offline macOS voice; live answers, so keep the group key free for ~4 min)
 .venv/bin/python -m playwright install chromium
 .venv/bin/streamlit run app.py --server.headless true --client.toolbarMode minimal --server.port 8502 &
-.venv/bin/python scripts/record_demo.py                # → reports/demo/researchgraph_demo.mp4
+.venv/bin/python scripts/record_demo.py                # → docs/demo/researchgraph_demo.mp4
 ```
 
 **QASPER** (CC BY 4.0) is not committed. Download it with:
@@ -98,7 +112,7 @@ RG_LIVE=1 .venv/bin/python -m pytest -q tests/test_live.py   # live end-to-end +
 
 | Set | Size | Purpose | Gold labels |
 |---|---|---|---|
-| `questions_v0.jsonl` (curated) | 62: 22 single-paper, 13 comparison, 10 multi-hop, 3 disagreement, 5 metadata, 9 unanswerable (q43–q62 added 23 Nov) | **Main test set** | Gold papers; reference answers and gold passages in `curated_references.jsonl` (drafted by Claude from the gold papers' passages); **team review in `reports/gold_review_sheet.csv`** |
+| `questions_v0.jsonl` (curated) | 62: 22 single-paper, 13 comparison, 10 multi-hop, 3 disagreement, 5 metadata, 9 unanswerable (q43–q62 added 23 Nov) | **Main test set** | Gold papers; reference answers and gold passages in `curated_references.jsonl` (drafted by Claude from the gold papers' passages) |
 | `synthetic_dev.jsonl` | 105 | Tuning | Exact gold passage (question written from it) |
 | `synthetic_test.jsonl` | 45 | Held out, reported once | Exact gold passage |
 | `answer_dev.jsonl` | 28 (12 unanswerable incl. 4 domain-mismatch, 12 synthetic dev, 4 comparisons) | Tuning the answer prompt only | Answerable or not |
@@ -136,6 +150,6 @@ data/seed_papers*.tsv  corpus seeds, hand-picked and snowballed (committed)
 data/manifests/        dated corpus manifests (committed, metadata only)
 data/eval/             evaluation question sets (committed)
 reports/               REPORT.md, SPEC.md, RESPONSIBLE_AI.md, STAGES.md, AGENT.md, PROMPTS.md, CHUNKING.md,
-                       INJECTION.md, RESULTS.md, DEMO.md, review sheets, raw JSON results
+                       INJECTION.md, RESULTS.md, DEMO.md, audit samples, raw JSON results
 tests/                 offline unit tests
 ```

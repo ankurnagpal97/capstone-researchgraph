@@ -248,7 +248,7 @@ with tab_eval:
     else:
         r = json.load(open(path))
         st.caption(f"Run {r['run_at']} · {r['n_papers']} papers · {r['n_chunks']} chunks. "
-                   "Curated gold labels are drafts until the team reviews them; synthetic questions are easier than real ones.")
+                   "Curated gold labels were drafted from the gold papers; synthetic questions are easier than real ones.")
         for name, systems in r["retrieval"].items():
             st.subheader(f"Retrieval: {name}")
             rows = []

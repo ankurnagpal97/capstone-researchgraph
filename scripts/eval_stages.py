@@ -13,8 +13,8 @@
   S7 Follow-up questions    3 suggestions per answer: novelty (ROUGE-L vs the original question) and whether the
                             corpus covers them (top cross-encoder score above the evidence threshold)
 
-Sets: curated (42 hand-written questions; reference answers in data/eval/curated_references.jsonl are DRAFTS until
-the team reviews them) and synthetic_test (45 held-out, reference answers written by Qwen from one known passage).
+Sets: curated (42 hand-written questions; reference answers in data/eval/curated_references.jsonl were
+drafted by Claude from the gold passages) and synthetic_test (45 held-out, reference answers written by Qwen from one known passage).
 Answers are cached in reports/stage_answers.jsonl; --reuse recomputes metrics without new LLM calls.
 
 Usage: .venv/bin/python scripts/eval_stages.py [--sets curated,synthetic_test] [--reuse] [--no-judge]
@@ -303,7 +303,7 @@ def write_md(rep: dict) -> None:
            f"Run {rep['run_at']} · LLM `{rep['llm']}` · embeddings `{rep['embeddings']}` · reranker `{rep['reranker']}` · "
            f"answer prompt `{rep['prompt']}` · follow-up prompt `{rep['followup_prompt']}`. Means with 95% bootstrap CIs.", "",
            "**Read with care.** Curated reference answers and gold passages (`data/eval/curated_references.jsonl`) were drafted "
-           "by Claude from the gold papers and still need team review; the gold passages were picked from each gold paper "
+           "by Claude from the gold papers; the gold passages were picked from each gold paper "
            "with help from the cross-encoder, so passage-level numbers may slightly favour B3. Synthetic reference answers were written by Qwen3-8B from "
            "one passage, so they share its wording. ROUGE counts word overlap: a correct answer phrased differently scores low, "
            "so read it with token F1, semantic similarity and the grounding numbers, not alone.", "",

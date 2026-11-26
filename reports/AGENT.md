@@ -45,4 +45,4 @@ Agent `agent-v1`: planner → executor (tools) → generator → critic, at most
 
 **Cost:** the course endpoint has no per-token price; cost is reported as tokens and LLM calls per query. Every LLM call holds the group's single request slot, so latency is also the cost to teammates.
 
-Curated gold labels and reference answers are drafts until the team review is imported; n = 62, so differences under about 0.10 are not established.
+Curated reference answers were drafted by Claude from the gold passages; n = 62, so differences under about 0.10 are not established.

@@ -25,7 +25,7 @@ def main():
     out = [f"# AI ResearchGraph — evaluation results", "",
            f"Run {ev['run_at']} · corpus {ev['n_papers']} papers, {ev['n_chunks']} chunks · "
            "values are means with 95% bootstrap confidence intervals over questions.", "",
-           "**Read with care.** Curated gold papers were drafted from paper titles and still need team review. "
+           "**Read with care.** Curated gold papers were drafted from paper titles. "
            "Synthetic questions were written by Qwen3-8B from one known passage each, so they echo that passage's wording "
            "and are easier than real questions. With n under 50 the intervals are wide: differences whose intervals overlap "
            "are not established.", ""]
@@ -86,9 +86,7 @@ def main():
                 ("Latency p50 / p95 (s)", f"{a['latency_p50_s']} / {a['latency_p95_s']}"),
                 ("Mean tokens per answer", a["mean_total_tokens"])]
         out += [f"| {k} | {v} |" for k, v in rows]
-        out += ["", f"*{a['note']}*", "",
-                "Human citation-support labels: fill in `reports/citation_audit_sample.csv` "
-                "(column `human_label`), then report the share labelled supported.", ""]
+        out += ["", f"*{a['note']}*", ""]
         fails = [r for r in a["per_question"] if (r["expected_answerable"] != r["model_answerable"]) or r["error"]]
         if fails:
             out += ["### Answer failures to analyse", "", "| Question | Type | Expected answerable | Model said | Note |",

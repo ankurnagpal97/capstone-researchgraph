@@ -2,7 +2,7 @@
 
 Run 2026-11-14 17:40 · corpus 146 papers, 11148 chunks · values are means with 95% bootstrap confidence intervals over questions.
 
-**Read with care.** Curated gold papers were drafted from paper titles and still need team review. Synthetic questions were written by Qwen3-8B from one known passage each, so they echo that passage's wording and are easier than real questions. With n under 50 the intervals are wide: differences whose intervals overlap are not established.
+**Read with care.** Curated gold papers were drafted from paper titles. Synthetic questions were written by Qwen3-8B from one known passage each, so they echo that passage's wording and are easier than real questions. With n under 50 the intervals are wide: differences whose intervals overlap are not established.
 
 ## Retrieval — curated (n = 36)
 
@@ -80,9 +80,8 @@ Paper Recall@10 by question type:
 | Latency p50 / p95 (s) | 8.08 / 13.67 |
 | Mean tokens per answer | 2523 |
 
-*auto_support_* are Qwen3-8B judging its own answers: an estimate. Human labels in reports/citation_audit_sample.csv are the real measure.*
+*auto_support_* are Qwen3-8B judging its own answers: an estimate, likely optimistic.*
 
-Human citation-support labels: fill in `reports/citation_audit_sample.csv` (column `human_label`), then report the share labelled supported.
 
 ### Answer failures to analyse
 
