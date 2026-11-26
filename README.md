@@ -10,7 +10,7 @@ A citation graph between papers is available as an optional retrieval step. A ci
 |---|---|
 | Technical report (PDF, links on page 1) | [reports/ResearchGraph_Technical_Report.pdf](reports/ResearchGraph_Technical_Report.pdf) · source [reports/REPORT.md](reports/REPORT.md) |
 | Trace dashboard | https://ankurnagpal97.github.io/capstone-researchgraph/traces/ (built by `scripts/make_trace_dashboard.py`) |
-| Demo video (about 10 minutes) | https://ankurnagpal97.github.io/capstone-researchgraph/demo/researchgraph_demo.mp4 · file: [docs/demo/researchgraph_demo.mp4](docs/demo/researchgraph_demo.mp4) |
+| Demo video (about 10 minutes) | Google Drive: https://drive.google.com/drive/folders/1-uIFLBif9m5Bf6S4FXTIoHNUYxJwrxtt · https://ankurnagpal97.github.io/capstone-researchgraph/demo/researchgraph_demo.mp4 · file: [docs/demo/researchgraph_demo.mp4](docs/demo/researchgraph_demo.mp4) |
 | Model card and Responsible AI | [reports/RESPONSIBLE_AI.md](reports/RESPONSIBLE_AI.md) |
 | Project page | https://ankurnagpal97.github.io/capstone-researchgraph/ |
 

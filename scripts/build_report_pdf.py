@@ -29,8 +29,9 @@ LINKS = [
      "Code, pinned requirements, Dockerfile, tests, evaluation scripts and result files. Setup and run commands: README."),
     ("Trace dashboard (OpenTelemetry)", f"{PAGES}/traces/",
      "Latency and tokens per span type, agent tool calls and critic verdicts, and a span waterfall for every traced task."),
-    ("Demo video (about 10 minutes)", f"{PAGES}/demo/researchgraph_demo.mp4",
-     f"Narrated recording of the running system. Also in the repository: {BLOB}/docs/demo/researchgraph_demo.mp4"),
+    ("Demo video (about 10 minutes), Google Drive", "https://drive.google.com/drive/folders/1-uIFLBif9m5Bf6S4FXTIoHNUYxJwrxtt",
+     f"Narrated recording of the running system. Also on GitHub Pages: {PAGES}/demo/researchgraph_demo.mp4 "
+     f"and in the repository: {BLOB}/docs/demo/researchgraph_demo.mp4"),
     ("Model card and Responsible AI", f"{BLOB}/reports/RESPONSIBLE_AI.md",
      "Intended use, out-of-scope uses, measured failure modes, refusal behaviour, PII handling, adversarial tests."),
     ("Technical report (online copy of this document)", f"{BLOB}/reports/REPORT.md",
